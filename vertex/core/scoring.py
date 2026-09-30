@@ -408,6 +408,22 @@ def aggregate(comps: list[Component], hard: list[str], weights: dict[str, Any], 
 
 def persist(conn: sqlite3.Connection, company_id: int, thesis_id: int, res: ScoreResult, weights_version: str,
             prompt_hash: str | None, scored_by: str = "engine") -> int:
+    own_txn = not conn.in_transaction
+    if own_txn:
+        conn.execute("BEGIN IMMEDIATE")
+    try:
+        sid = _persist(conn, company_id, thesis_id, res, weights_version, prompt_hash, scored_by)
+        if own_txn:
+            conn.execute("COMMIT")
+        return sid
+    except Exception:
+        if own_txn:
+            conn.execute("ROLLBACK")
+        raise
+
+
+def _persist(conn: sqlite3.Connection, company_id: int, thesis_id: int, res: ScoreResult, weights_version: str,
+             prompt_hash: str | None, scored_by: str) -> int:
     cur = conn.execute(
         "INSERT INTO scores(company_id, thesis_id, weights_version, prompt_hash, attractiveness, attractiveness_conf, transactability, "
         "transactability_conf, vertex_score, vertex_conf, band_low, band_high, coverage_pct, provisional, tier, hard_exclusion_reason, "

@@ -55,7 +55,7 @@ apollo:
 
 bridge:
   # In bridge mode Claude transcribes each MCP response to a file, so pages stay small.
-  inven_page_limit: 150
+  inven_page_limit: 60
   lemlist_page_limit: 50
   apollo_per_page: 25
   max_attempts: 3

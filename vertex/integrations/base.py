@@ -47,6 +47,8 @@ _LEMLIST_TOOL_MAP: dict[str, tuple[str, str]] = {
     "get_campaign_sequences": ("GET", "/api/campaigns/{campaignId}/sequences"),
     "get_unsubscribes": ("GET", "/api/unsubscribes"),
     "search_campaign_leads": ("GET", "/api/campaigns/{campaignId}/leads"),
+    "search_contacts": ("GET", "/api/contacts"),
+    "get_lead_by_email": ("GET", "/api/leads/{email}"),
     "get_activities": ("GET", "/api/activities"),
     "get_inbox_conversations": ("GET", "/api/inbox"),
     "get_inbox_conversation": ("GET", "/api/inbox/{contactId}"),
@@ -67,6 +69,8 @@ def _lemlist_call(tool: str, args: dict[str, Any]) -> Any:
         raise BridgeUnavailable("LEMLIST_API_KEY not set")
     if tool not in _LEMLIST_TOOL_MAP:
         raise FatalError(f"no REST mapping for lemlist tool {tool}")
+    if tool == "search_campaign_leads" and "email" in args and "campaignId" not in args:
+        tool, args = "get_lead_by_email", {"email": args["email"], "version": "v2"}
     method, path = _LEMLIST_TOOL_MAP[tool]
     path = path.format(**{k: v for k, v in args.items() if isinstance(v, str)})
     params = {k: v for k, v in args.items() if f"{{{k}}}" not in _LEMLIST_TOOL_MAP[tool][1]} if method == "GET" else None

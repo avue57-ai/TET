@@ -1,0 +1,8 @@
+# Manual permanent suppression. Domains, emails or LinkedIn URLs. Reason is always "manual".
+# Add the firm's own domains, portfolio companies, friends of the house, and anyone who asked never to be contacted.
+domains:
+  - vertex-equity.com
+  - vertex-equity.net
+  - mgt.us
+emails: []
+linkedin: []

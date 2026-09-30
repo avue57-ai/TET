@@ -114,5 +114,5 @@ def score_company(conn: sqlite3.Connection, company_id: int, thesis_id: int, the
     if llm_dict:
         comps = scoring.merge_llm(comps, llm_dict, material)
     res = scoring.aggregate(comps, hard, weights, row["ownership_confidence"])
-    scoring.persist(conn, company_id, thesis_id, res, weights["version"], phash)
+    scoring.persist(conn, company_id, thesis_id, res, weights["version"], phash, scored_by="engine" if llm_dict else "rules")
     return res

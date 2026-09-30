@@ -387,6 +387,13 @@ def ingest_search_rows(conn: sqlite3.Connection, job: dict[str, Any], payload: A
         "UPDATE source_queries SET rows_returned = rows_returned + ?, new_companies = new_companies + ?, status = 'running', run_at = ? WHERE id = ?",
         (len(rows), inserted, utcnow(), sq_id),
     )
+    credits = payload.get("credits_used") if isinstance(payload, dict) else None
+    if isinstance(credits, dict):
+        from vertex.db.repo import add_credit
+        if credits.get("export"):
+            add_credit(conn, kw.get("run_id"), "inven", "inven_export", float(credits["export"]), f"job {job['id']}")
+        if credits.get("ai"):
+            add_credit(conn, kw.get("run_id"), "inven", "inven_ai", float(credits["ai"]), f"job {job['id']}")
     # paging decision
     settings = get_settings()
     cap = int(settings.budgets.inven_export_rows_per_run)

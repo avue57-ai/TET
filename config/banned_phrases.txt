@@ -1,0 +1,54 @@
+# One regex per line (case-insensitive). Lines starting with # are comments.
+# --- sensitive themes (house rule: never in outreach) ---
+\bretire(ment|d|s|)?\b
+\bsuccession\b
+\bsuccessor\b
+\bnext chapter\b
+\blegacy planning\b
+\bexit (plan|strategy|planning)\b
+\byour age\b
+\bgetting older\b
+\bhealth (issue|reason)s?\b
+\bdistress(ed)?\b
+\bsell (your|the) (company|business)\b
+\bselling (your|the) (company|business)\b
+\blooking to sell\b
+\bready to sell\b
+\bcash out\b
+# --- AI / template tells ---
+\bI hope this (message |email )?finds you well\b
+\bhope this finds you\b
+\bI came across\b
+\bI('m| am) reaching out\b
+\breaching out\b
+\bsynerg(y|ies|istic)\b
+\bleverage\b
+\bstreamline\b
+\bunlock\b
+\btransformative\b
+\bseamless(ly)?\b
+\bcutting[- ]edge\b
+\brobust\b
+\bgame[- ]chang(er|ing)\b
+\bdelve\b
+\bempower\b
+\binnovative\b
+\bcomprehensive\b
+\bimpressive\b
+\bincredible\b
+\bI was blown away\b
+\bin today's (fast-paced|competitive)\b
+\bpick your brain\b
+\blet me know your thoughts\b
+\bquick question\b
+\bcircling back\b
+\bjust checking in\b
+\btouch base\b
+\bvalue proposition\b
+\bworld[- ]class\b
+\bbest[- ]in[- ]class\b
+# --- pressure / process ---
+\burgent(ly)?\b
+\blimited time\b
+\bact now\b
+\bdon't miss\b

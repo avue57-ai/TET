@@ -328,11 +328,13 @@ def screen(thesis: str, all: bool = typer.Option(False, "--all", help="Re-screen
 
 @app.command()
 def score(thesis: str, company: Optional[list[str]] = typer.Option(None, help="domain(s); default = all Screened+ companies"),
-          no_llm: bool = False, rescore: bool = False, limit: int = 500) -> None:
+          no_llm: bool = False, rescore: bool = False, limit: int = 1000, workers: int = 4,
+          keepers_only: bool = typer.Option(False, help="only companies with prescreen_status = keep")) -> None:
     """Score companies (rules + Claude components). Appends a new score snapshot per company."""
     from vertex.ai.score import score_company
     from vertex.core.scoring import load_weights
     from vertex.core.thesis import load_thesis
+    from vertex.utils.parallel import parallel_map
     conn = _conn()
     t = load_thesis(thesis)
     trow = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()
@@ -341,23 +343,28 @@ def score(thesis: str, company: Optional[list[str]] = typer.Option(None, help="d
         ids = [r[0] for d in company for r in conn.execute("SELECT id FROM companies WHERE domain = ?", (d,))]
     else:
         q = ("SELECT tc.company_id FROM thesis_companies tc WHERE tc.thesis_id = ? AND tc.stage NOT IN ('Identified','Excluded','Passed')"
-             + ("" if rescore else " AND tc.company_id NOT IN (SELECT company_id FROM scores WHERE thesis_id = ? AND weights_version = ?)")
+             + (" AND tc.prescreen_status = 'keep'" if keepers_only else "")
+             + ("" if rescore else " AND tc.company_id NOT IN (SELECT company_id FROM scores WHERE thesis_id = ? AND weights_version = ? AND scored_by = ?)")
              + " LIMIT ?")
-        args = (trow["id"], trow["id"], weights["version"], limit) if not rescore else (trow["id"], limit)
+        by = "rules" if no_llm else "engine"
+        args = (trow["id"], trow["id"], weights["version"], by, limit) if not rescore else (trow["id"], limit)
         ids = [r[0] for r in conn.execute(q, args)]
     tiers: dict[str, int] = {}
-    for i, cid in enumerate(ids, 1):
-        try:
-            conn.execute("BEGIN")
-            res = score_company(conn, cid, trow["id"], t, use_llm=not no_llm, weights=weights)
-            conn.execute("COMMIT")
-        except Exception as ex:  # noqa: BLE001
-            conn.execute("ROLLBACK")
-            console.print(f"[red]company {cid}: {ex}[/red]")
-            continue
+    tid = trow["id"]
+
+    def work(c, cid):
+        return score_company(c, cid, tid, t, use_llm=not no_llm, weights=weights)
+
+    def ok(cid, res):
         tiers[res.tier] = tiers.get(res.tier, 0) + 1
-        if i % 10 == 0:
-            console.print(f"scored {i}/{len(ids)} …")
+        n = sum(tiers.values())
+        if n % 25 == 0:
+            console.print(f"scored {n}/{len(ids)} … {tiers}")
+
+    def bad(cid, ex):
+        console.print(f"[red]company {cid}: {ex}[/red]")
+
+    parallel_map(work, ids, workers=1 if no_llm else workers, on_result=ok, on_error=bad)
     console.print(json.dumps({"scored": len(ids), "tiers": tiers}, indent=2))
 
 
@@ -377,15 +384,19 @@ def prescreen_sample(thesis: str, vertical: str, n: int = 25) -> None:
 
 
 @prescreen_app.command("judge")
-def prescreen_judge(thesis: str, vertical: Optional[str] = None, limit: int = 50) -> None:
-    """Judge sampled companies whose WebSearch summaries are in (or Inven-only when none)."""
+def prescreen_judge(thesis: str, vertical: Optional[str] = None, limit: int = 1000, workers: int = 4,
+                    inven_only: bool = typer.Option(False, help="judge from Inven material even without WebSearch summaries")) -> None:
+    """Judge thesis fit + size + ownership for pending companies (Claude; verbatim-evidence guarded)."""
     from vertex.ai.screen import judge
     from vertex.core.thesis import load_thesis
+    from vertex.utils.parallel import parallel_map
     conn = _conn()
     t = load_thesis(thesis)
     trow = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()
     q = ("SELECT tc.company_id FROM thesis_companies tc JOIN companies c ON c.id = tc.company_id WHERE tc.thesis_id = ? "
-         "AND tc.prescreen_status = 'pending' AND tc.company_id IN (SELECT company_id FROM source_records WHERE source = 'websearch')")
+         "AND tc.prescreen_status = 'pending' AND tc.stage NOT IN ('Excluded','Passed')")
+    if not inven_only:
+        q += " AND tc.company_id IN (SELECT company_id FROM source_records WHERE source = 'websearch')"
     args: list = [trow["id"]]
     if vertical:
         q += " AND c.vertical = ?"
@@ -393,13 +404,23 @@ def prescreen_judge(thesis: str, vertical: Optional[str] = None, limit: int = 50
     q += " LIMIT ?"
     args.append(limit)
     ids = [r[0] for r in conn.execute(q, args)]
-    out = {"keep": 0, "drop": 0, "unclear": 0}
-    for cid in ids:
-        conn.execute("BEGIN")
-        v = judge(conn, cid, trow["id"], t)
-        conn.execute("COMMIT")
-        st = conn.execute("SELECT prescreen_status FROM thesis_companies WHERE thesis_id = ? AND company_id = ?", (trow["id"], cid)).fetchone()[0]
+    out: dict[str, int] = {}
+    tid = trow["id"]
+
+    def work(c, cid):
+        judge(c, cid, tid, t)
+        return c.execute("SELECT prescreen_status FROM thesis_companies WHERE thesis_id = ? AND company_id = ?", (tid, cid)).fetchone()[0]
+
+    def ok(cid, st):
         out[st] = out.get(st, 0) + 1
+        n = sum(out.values())
+        if n % 25 == 0:
+            console.print(f"judged {n}/{len(ids)} … {out}")
+
+    def bad(cid, ex):
+        console.print(f"[red]company {cid}: {ex}[/red]")
+
+    parallel_map(work, ids, workers=workers, on_result=ok, on_error=bad)
     console.print(json.dumps({"judged": len(ids), **out}))
 
 
@@ -423,3 +444,259 @@ def main() -> None:  # pragma: no cover
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())
+
+
+# ---------------------------------------------------------------- enrichment / contacts
+
+def _targets(conn, thesis: str, tiers: str, limit: int, keepers_only: bool):
+    from vertex.workflows.enrich import target_company_ids
+    trow = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()
+    return trow["id"], target_company_ids(conn, trow["id"], tiers.split(","), keepers_only, limit)
+
+
+@app.command()
+def enrich(thesis: str, tiers: str = "T1,T2", limit: int = 100, keepers_only: bool = True) -> None:
+    """Enqueue Apollo organization enrichment (1 credit/match) for top-tier companies without Apollo data."""
+    from vertex.workflows.enrich import plan_org_enrichment
+    conn = _conn()
+    _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    jobs = plan_org_enrichment(conn, ids)
+    console.print(f"{len(ids)} target companies; enqueued {len(jobs)} org-enrich job(s). Run `vertex bridge next --connector apollo`.")
+
+
+contacts_app = typer.Typer(help="Decision-maker discovery and selection (Apollo)")
+app.add_typer(contacts_app, name="contacts")
+
+
+@contacts_app.command("find")
+def contacts_find(thesis: str, tiers: str = "T1,T2", limit: int = 100, keepers_only: bool = True) -> None:
+    """Enqueue Apollo people searches (owner/founder/CEO/president titles) for target companies without contacts."""
+    from vertex.workflows.enrich import plan_contact_search
+    conn = _conn()
+    _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    jobs = plan_contact_search(conn, ids)
+    console.print(f"{len(ids)} target companies; enqueued {len(jobs)} people-search job(s).")
+
+
+@contacts_app.command("select")
+def contacts_select(thesis: str, tiers: str = "T1,T2", limit: int = 100, keepers_only: bool = True) -> None:
+    """Pick the primary decision-maker per company by the title ladder; flag companies with none."""
+    from vertex.workflows.enrich import select_contacts
+    conn = _conn()
+    tid, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    console.print(json.dumps(select_contacts(conn, tid, ids)))
+
+
+@contacts_app.command("reveal")
+def contacts_reveal(thesis: str, tiers: str = "T1,T2", limit: int = 100, keepers_only: bool = True) -> None:
+    """Enqueue Apollo bulk-match reveals (work email) for primary contacts only."""
+    from vertex.workflows.enrich import plan_reveals
+    conn = _conn()
+    _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    jobs = plan_reveals(conn, ids)
+    console.print(f"enqueued {len(jobs)} bulk-match job(s) for primary contacts of {len(ids)} companies.")
+
+
+@contacts_app.command("show")
+def contacts_show(thesis: str, tiers: str = "T1,T2", limit: int = 100, keepers_only: bool = True) -> None:
+    from vertex.workflows.enrich import contact_summary
+    conn = _conn()
+    _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    t = Table(title="primary contacts")
+    for c in ("company", "domain", "cands", "name", "title", "rank", "email", "status"):
+        t.add_column(c)
+    for r in contact_summary(conn, ids):
+        p = r["primary"] or {}
+        t.add_row(r["company"][:28], r["domain"], str(r["candidates"]), f"{p.get('first_name','') or ''} {p.get('last_name','') or ''}".strip(),
+                  (p.get("title") or "")[:28], str(p.get("role_rank") or ""), p.get("email") or "", p.get("email_status") or "")
+    console.print(t)
+
+
+# ---------------------------------------------------------------- signals + personalization
+signals_app = typer.Typer(help="Signal research (WebSearch via bridge) and extraction")
+app.add_typer(signals_app, name="signals")
+personalize_app = typer.Typer(help="Per-contact outreach copy: generate, lint, critic")
+app.add_typer(personalize_app, name="personalize")
+
+
+@signals_app.command("plan")
+def signals_plan(thesis: str, tiers: str = "T1,T2", limit: int = 50, keepers_only: bool = True,
+                 kinds: Optional[list[str]] = typer.Option(None, help="overview,credentials,customers,people")) -> None:
+    """Enqueue WebSearch jobs for target companies (Claude executes them via `vertex bridge next --connector websearch`)."""
+    from vertex.integrations.websearch import plan_signal_searches
+    conn = _conn()
+    _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    n = 0
+    for cid in ids:
+        n += len(plan_signal_searches(conn, cid, kinds))
+    console.print(f"enqueued {n} websearch job(s) for {len(ids)} companies.")
+
+
+@signals_app.command("extract")
+def signals_extract(thesis: str, tiers: str = "T1,T2", limit: int = 50, keepers_only: bool = True, workers: int = 4,
+                    company: Optional[list[str]] = typer.Option(None, help="domain(s)")) -> None:
+    """Extract evidence-quoted signals per company (one Claude call each; cached)."""
+    from vertex.ai.signals import extract_signals
+    from vertex.core.thesis import load_thesis
+    from vertex.utils.parallel import parallel_map
+    conn = _conn()
+    t = load_thesis(thesis)
+    if company:
+        ids = [r[0] for r in conn.execute(f"SELECT id FROM companies WHERE domain IN ({','.join('?' * len(company))})", company)]
+    else:
+        _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+    totals = {"signals": 0, "rejected": 0, "companies": 0, "errors": 0}
+
+    def _one(c, cid):
+        return extract_signals(c, cid, t)
+
+    def _ok(cid, res):
+        totals["companies"] += 1
+        totals["signals"] += res["signals"]
+        totals["rejected"] += res["rejected"]
+
+    def _err(cid, exc):
+        totals["errors"] += 1
+        console.print(f"[red]company {cid}: {exc}")
+
+    parallel_map(_one, ids, workers=workers, on_result=_ok, on_error=_err)
+    console.print(json.dumps(totals))
+
+
+@signals_app.command("show")
+def signals_show(domain: str) -> None:
+    conn = _conn()
+    row = conn.execute("SELECT id, name FROM companies WHERE domain = ?", (domain,)).fetchone()
+    if not row:
+        raise typer.Exit(1)
+    t = Table(title=f"signals: {row['name']}")
+    for c in ("id", "type", "conf", "cite", "banned", "fresh", "text", "quote"):
+        t.add_column(c)
+    for s in conn.execute("SELECT * FROM signals WHERE company_id = ? ORDER BY safe_to_cite DESC, confidence DESC", (row["id"],)):
+        t.add_row(str(s["id"]), s["hook_type"], f"{s['confidence']:.2f}", "y" if s["safe_to_cite"] else "", "y" if s["banned_theme"] else "",
+                  s["freshness"] or "", (s["text"] or "")[:70], (s["evidence_quote"] or "")[:60])
+    console.print(t)
+
+
+@personalize_app.command("run")
+def personalize_run(thesis: str, tiers: str = "T1,T2", limit: int = 50, keepers_only: bool = True, workers: int = 3,
+                    arm: str = "linkedin_led", no_critic: bool = False, contact: Optional[list[int]] = typer.Option(None)) -> None:
+    """Generate the full message set for each company's primary contact; lint + critic; store as draft/needs_edit."""
+    from vertex.ai.personalize import generate_for_contact
+    from vertex.core.thesis import load_thesis
+    from vertex.utils.parallel import parallel_map
+    conn = _conn()
+    t = load_thesis(thesis)
+    if contact:
+        cids = list(contact)
+    else:
+        _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+        q = f"SELECT id FROM contacts WHERE is_primary = 1 AND company_id IN ({','.join('?' * len(ids))})"
+        cids = [r[0] for r in conn.execute(q, ids)] if ids else []
+    out = {"draft": 0, "needs_edit": 0, "no_hook": 0, "errors": 0}
+
+    def _one(c, cid):
+        return generate_for_contact(c, cid, t, arm=arm, critic=not no_critic)
+
+    def _ok(cid, res):
+        out[res["status"]] = out.get(res["status"], 0) + 1
+        if res.get("lint"):
+            console.print(f"contact {cid} [{res['status']}] lint: {res['lint']}")
+
+    def _err(cid, exc):
+        out["errors"] += 1
+        console.print(f"[red]contact {cid}: {exc}")
+
+    parallel_map(_one, cids, workers=workers, on_result=_ok, on_error=_err)
+    console.print(json.dumps(out))
+
+
+@personalize_app.command("show")
+def personalize_show(domain: str, steps: Optional[list[str]] = typer.Option(None)) -> None:
+    conn = _conn()
+    rows = conn.execute(
+        "SELECT m.*, ct.first_name, ct.last_name, ct.title AS ctitle FROM messages m JOIN contacts ct ON ct.id = m.contact_id JOIN companies c ON c.id = m.company_id "
+        "WHERE c.domain = ? AND m.status != 'rejected' ORDER BY m.contact_id, m.id", (domain,)).fetchall()
+    for m in rows:
+        if steps and m["step_key"] not in steps:
+            continue
+        flags = json.loads(m["lint_flags_json"] or "[]")
+        console.rule(f"{m['step_key']} → {m['first_name']} {m['last_name']} ({m['ctitle']}) [{m['status']}] variant {m['variant_key']} critic {m['critic_score']} lint {flags}")
+        if m["subject"]:
+            console.print(f"[bold]Subject:[/bold] {m['subject']}")
+        console.print(m["body"])
+
+
+# ---------------------------------------------------------------- suppression + gates
+@suppression_app.command("status")
+def suppression_status() -> None:
+    from vertex.workflows.suppression import seed_status
+    console.print(json.dumps(seed_status(_conn()), indent=1, default=str))
+
+
+@suppression_app.command("import-never-contact")
+def suppression_import_never_contact() -> None:
+    from vertex.workflows.suppression import import_never_contact
+    console.print(json.dumps(import_never_contact(_conn())))
+
+
+@suppression_app.command("plan-lemlist")
+def suppression_plan_lemlist(thesis: Optional[str] = None, tiers: str = "T1,T2", limit: int = 100, keepers_only: bool = True,
+                             unsubscribes: bool = True, lookups: bool = False) -> None:
+    """Enqueue Lemlist unsubscribe sync and (optionally) per-target lead/contact lookups for the thesis targets."""
+    from vertex.integrations.lemlist import plan_lookups, plan_unsubscribes
+    conn = _conn()
+    out: dict[str, Any] = {}
+    if unsubscribes:
+        out["unsubscribes_job"] = plan_unsubscribes(conn)
+    if lookups and thesis:
+        _, ids = _targets(conn, thesis, tiers, limit, keepers_only)
+        out["lookup_jobs"] = plan_lookups(conn, ids)
+    console.print(json.dumps(out))
+
+
+@suppression_app.command("import-lemlist-leads")
+def suppression_import_lemlist_leads() -> None:
+    """REST-key path only: bulk import every legacy campaign's leads as prior outreach (needs LEMLIST_API_KEY + network)."""
+    from vertex.integrations.lemlist import import_campaign_leads_rest
+    console.print(json.dumps(import_campaign_leads_rest(_conn())))
+
+
+@suppression_app.command("check")
+def suppression_check(value: str) -> None:
+    """Show active suppression rows for an email, domain, or LinkedIn URL."""
+    from vertex.workflows.suppression import classify_value, hits
+    cv = classify_value(value)
+    if not cv:
+        raise typer.Exit(1)
+    rows = hits(_conn(), **{cv[0] if cv[0] != "linkedin" else "linkedin": cv[1]})
+    console.print(json.dumps([dict(r) for r in rows], indent=1))
+
+
+@suppression_app.command("add")
+def suppression_add(value: str, reason: str = "manual", days: Optional[int] = None, hold: bool = False) -> None:
+    from vertex.workflows.suppression import add_suppression, classify_value, cooldown
+    cv = classify_value(value)
+    if not cv:
+        raise typer.Exit(1)
+    new = add_suppression(_conn(), cv[0], cv[1], reason, "cli", expires_at=cooldown(days) if days else None, hold_for_human=hold)
+    console.print(f"{'added' if new else 'updated'} {cv[0]}={cv[1]} reason={reason}")
+
+
+@campaign_app.command("gates")
+def campaign_gates(contact_id: int, campaign_id: int, channel_scope: str = "full") -> None:
+    """Run the eight enrollment gates for one contact against one engine campaign."""
+    from vertex.core.gates import check_enrollment
+    ok, results, decision = check_enrollment(_conn(), contact_id, campaign_id, channel_scope)
+    t = Table(title=f"gates contact {contact_id} → campaign {campaign_id}: {'PASS' if ok else 'BLOCKED'} (decision {decision})")
+    t.add_column("gate"); t.add_column("result"); t.add_column("detail")
+    for r in results:
+        t.add_row(r.name, "[green]pass" if r.passed else ("[yellow]hold" if r.hold else "[red]fail"), r.detail)
+    console.print(t)
+
+
+@suppression_app.command("plan-granola")
+def suppression_plan_granola(time_range: str = "last_30_days") -> None:
+    """Enqueue a Granola list_meetings job (Claude executes it); matched company names become held existing relationships."""
+    from vertex.integrations.granola import plan_meetings
+    console.print(json.dumps({"granola_job": plan_meetings(_conn(), time_range)}))
