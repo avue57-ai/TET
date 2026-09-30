@@ -1,0 +1,81 @@
+# Vertex Origination Engine — operating settings.
+# Everything here is safe to commit. Secrets live only in environment variables (see .env.example).
+
+timezone: America/Detroit
+
+persona:
+  # One persona object: the email mailbox, the Lemlist user, the LinkedIn account and the signature must belong to one person.
+  name: Asean Vue
+  first_name: Asean
+  title: Partner
+  firm: Vertex Equity
+  phone: "(517) 599-8509"
+  mailbox: avue@vertex-equity.com          # usm_uDDNGbu7itDvHYSZk, 50/day cap, shared with two running legacy campaigns
+  lemlist_user_id: usr_i3CpK2KkjrGPdQt9F
+  linkedin_user_id: usr_i3CpK2KkjrGPdQt9F
+  signature_owner: Asean Vue
+
+mailboxes:
+  # Per-mailbox daily send limits as configured in Lemlist, and the share the engine may use.
+  avue@vertex-equity.com: {daily_limit: 50, legacy_usage_estimate: 40, engine_allocation: 10, enabled: true}
+  avue@vertex-equity.net: {daily_limit: 80, legacy_usage_estimate: 0, engine_allocation: 0, enabled: false}   # parked until rehab
+  slee@vertex-equity.net: {daily_limit: 80, legacy_usage_estimate: 0, engine_allocation: 0, enabled: false}   # Sarah's; enable only if she agrees
+
+linkedin_limits: {daily_invites: 20, daily_messages: 30, daily_visits: 30, engine_share: 0.75}
+
+campaign:
+  name_prefix: "VX |"
+  folder: "Vertex Engine"
+  enroll_cap_per_day: 25            # hard cap on new leads/day across all engine campaigns (further limited by mailbox headroom)
+  cooldown_days_prior_outreach: 180
+  cooldown_days_not_interested: 365
+  employment_verified_max_age_days: 30
+  contact_confidence_min: 0.6
+  bounce_rate_pause_pct: 3.0
+  unsubscribe_rate_pause_pct: 1.0
+  linkedin_accept_min_pct_after_100: 10.0
+  new_mailbox_ramp_per_day: 10
+
+budgets:
+  # Per-run caps. Jobs whose estimated credits exceed the remaining budget are withheld by `vertex bridge next`.
+  inven_ai_credits_per_run: 150
+  inven_export_rows_per_run: 600
+  apollo_credits_per_run: 400
+  apollo_org_enrich_credits_per_run: 300
+  llm_usd_per_run: 15.0
+  websearch_queries_per_run: 200
+
+apollo:
+  enrich_stage: screened            # screened | accepted — when to spend 1 credit/company on org enrichment
+  people_titles: [Founder, Co-Founder, Owner, CEO, Chief Executive Officer, President, Chairman, Managing Partner, Principal]
+  people_per_page: 100
+  domains_per_people_search: 25
+  waterfall_email: false
+  reveal_phone: false
+
+bridge:
+  # In bridge mode Claude transcribes each MCP response to a file, so pages stay small.
+  inven_page_limit: 150
+  lemlist_page_limit: 50
+  apollo_per_page: 25
+  max_attempts: 3
+
+review:
+  enroll_cards_per_day: 25
+  new_target_rows_per_day: 30
+  stale_after_days: 3
+
+scoring:
+  weights_file: config/scoring/weights.yaml
+  composite: geometric              # geometric | weighted
+  weighted_attractiveness_share: 0.45
+
+llm:
+  backend: claude_cli               # claude_cli | anthropic_sdk
+  model: null                       # null = CLI default
+  timeout_seconds: 180
+  max_retries: 2
+
+routines:
+  persistence_verified: false       # set true only after a Routine has been observed pushing data commits
+  no_spend_until_verified: true

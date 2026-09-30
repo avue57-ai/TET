@@ -1,0 +1,46 @@
+# Thesis template. Copy to <slug>.yaml. Every key is documented; unknown keys are rejected by `vertex thesis validate`.
+slug: example_thesis
+name: Example thesis
+buyer_positioning: >-
+  Anonymous permanent-capital / family-office buyer that buys and holds; the founder keeps running the business;
+  no banker, no process, no pressure.
+size:
+  revenue_usd: [5000000, 50000000]     # Inven estimate or registry; a band, never a point
+  ebitda_usd: null                     # rarely observable for US private companies; leave null
+  employees: [25, 250]                 # LinkedIn headcount band (hard screen when known)
+geography:
+  countries: [US]
+  states: []                           # optional list of two-letter codes
+ownership:
+  allowed: [founder, family, management]
+  capital_rule: no_institutional_equity   # any VC/PE/growth/search-fund/sponsor round is a hard exclusion
+  esop: separate_track
+clarifications:
+  no_vc_funding: "no funding rounds and no investor rows"
+  bootstrapped: "founder or family funded only"
+founded_before: 2019
+growth: {min_headcount_growth_12m: null, prefer: [steady, expanding]}
+customer_base: {types: [SMB, mid-market, enterprise, government], concentration_tolerance: moderate}
+recurring_revenue: {required: true, forms: [subscription, annual license, managed service, maintenance contract]}
+mission_critical: {rationale: "system of record or mandated workflow", terms: [compliance, audit, regulatory, uptime]}
+max_new_companies_per_week: 300
+max_rows_per_query: 600
+priors:                                # thesis-level defaults, overridable per vertical; 0-5 scale except rev/employee
+  rev_per_employee_usd: 180000
+  capital_intensity: 1
+  fragmentation: 4
+  tailwinds: 4
+  industry: 4
+  market_growth: 3
+verticals:
+  - key: example_vertical
+    description: "One sentence describing the ideal company in plain words."
+    inclusion_terms: []
+    product_terms: []
+    end_market_terms: []
+    customer_reference_terms: [trusted by, customers include]
+    business_model_indicators: [subscription, SaaS, per-seat, annual license]
+    exemplar_companies: []             # domains; lookalike family runs in wave 1 when present
+    false_positive_terms: []
+    known_consolidators: []            # names of roll-ups / platforms whose members are excluded
+    priors: {}

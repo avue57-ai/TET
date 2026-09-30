@@ -1,0 +1,22 @@
+# Secrets and local state
+.env
+*.pyc
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Raw connector payloads and logs are re-fetchable; the DB and its text dump ARE committed.
+data/raw/
+data/logs/
+data/inbox/*.json
+!data/inbox/.gitkeep
+data/vertex.db-journal
+data/vertex.db-wal
+data/vertex.db-shm
+
+# Editor
+.vscode/
+.idea/

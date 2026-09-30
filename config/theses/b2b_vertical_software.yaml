@@ -1,0 +1,131 @@
+slug: b2b_vertical_software
+name: Vertical B2B software and tech-enabled services (founder-owned, US)
+buyer_positioning: >-
+  Anonymous permanent-capital / family-office buyer that buys and holds; the founder keeps running the business;
+  no banker, no process, no pressure.
+size:
+  revenue_usd: [5000000, 50000000]
+  ebitda_usd: null
+  employees: [25, 250]
+geography:
+  countries: [US]
+  states: []
+ownership:
+  allowed: [founder, family, management]
+  capital_rule: no_institutional_equity
+  esop: separate_track
+clarifications:
+  no_vc_funding: "no funding rounds and no investor rows; bootstrapped or founder- and family-funded only"
+  bootstrapped: "founder or family funded only, no outside institutional investors"
+founded_before: 2019
+growth: {min_headcount_growth_12m: null, prefer: [steady, expanding]}
+customer_base: {types: [SMB, mid-market, enterprise, government], concentration_tolerance: moderate}
+recurring_revenue: {required: true, forms: [subscription, annual license, managed service, maintenance contract, transaction fees]}
+mission_critical: {rationale: "system of record or mandated workflow that customers cannot switch off", terms: [compliance, audit, regulatory, safety, uptime, billing, scheduling]}
+max_new_companies_per_week: 300
+max_rows_per_query: 600
+priors:
+  rev_per_employee_usd: 180000
+  capital_intensity: 1
+  fragmentation: 4
+  tailwinds: 4
+  industry: 4
+  market_growth: 3
+verticals:
+  - key: compliance_ehs_quality
+    description: >-
+      Software that regulated companies use to manage compliance, environmental health and safety, quality, audits,
+      training records and regulatory reporting.
+    inclusion_terms: [compliance management software, EHS software, environmental health and safety software,
+      quality management software, QMS, audit management software, regulatory reporting software, GRC software,
+      safety management software, training compliance software, permit management software, chemical inventory software]
+    product_terms: [incident tracking, corrective and preventive action, CAPA, document control, SDS management,
+      safety data sheets, permit-to-work, inspection checklists, audit trails, policy attestation, training records,
+      calibration management, nonconformance, supplier quality, risk register]
+    end_market_terms: [manufacturers, utilities, hospitals, laboratories, food processors, construction contractors,
+      oil and gas operators, chemical plants, municipalities, regulated industries, FDA-regulated, OSHA]
+    customer_reference_terms: [trusted by, customers include, used by, case study]
+    business_model_indicators: [subscription, SaaS, per-seat, annual license, cloud-based, hosted, managed service]
+    exemplar_companies: []
+    false_positive_terms: [consulting only, staffing, marketplace, reseller, training provider only, law firm]
+    known_consolidators: [Cority, Intelex, VelocityEHS, Sphera, Enablon, Wolters Kluwer, ETQ, Hexagon, MasterControl,
+      Veeva, Ideagen, Benchmark Gensuite, EcoOnline, Alcumus, Diligent, NAVEX, Workiva, LogicGate, AuditBoard,
+      Constellation Software, Volaris, Jonas Software, Harris Computer, Vela Software, Valsoft, Banyan Software,
+      Roper Technologies, Vista Equity, Thoma Bravo]
+    priors: {rev_per_employee_usd: 190000, capital_intensity: 1, fragmentation: 4, tailwinds: 4, industry: 4, market_growth: 3}
+  - key: healthcare_lifesci_software
+    description: >-
+      Practice, clinic, laboratory and life-sciences software: practice management, specialty EHR, lab information
+      systems, device and lab informatics, credentialing, home-health and behavioral-health platforms.
+    inclusion_terms: [practice management software, specialty EHR, laboratory information system, LIS, LIMS,
+      lab informatics, credentialing software, medical billing software, revenue cycle software, home health software,
+      behavioral health software, dental practice software, veterinary practice software, clinical trial software,
+      pharmacy software, medical device software, patient engagement software]
+    product_terms: [scheduling, charting, e-prescribing, claims processing, prior authorization, patient portal,
+      HIPAA compliant, HL7, FHIR integration, specimen tracking, sample management, quality control, instrument
+      integration, care coordination, referral management]
+    end_market_terms: [physician practices, clinics, hospitals, laboratories, dental practices, veterinary practices,
+      home health agencies, hospices, behavioral health providers, pharmacies, medical device manufacturers,
+      biotech, CROs, long-term care]
+    customer_reference_terms: [trusted by, customers include, used by, case study]
+    business_model_indicators: [subscription, SaaS, per-provider, per-location, annual license, cloud-based, hosted]
+    exemplar_companies: []
+    false_positive_terms: [staffing, telehealth provider, clinic operator, consulting only, medical practice, reseller]
+    known_consolidators: [athenahealth, NextGen Healthcare, ModMed, Modernizing Medicine, WebPT, Tebra, Kareo,
+      AdvancedMD, eClinicalWorks, PointClickCare, MatrixCare, Netsmart, Nextech, CareCloud, Greenway Health,
+      Henry Schein One, Dentrix, Patterson, Covetrus, IDEXX, Alta Vista, WellSky, Brightree, ResMed, Homecare Homebase,
+      Axxess, Therapy Brands, Valant, Qualifacts, Ontario Systems, Constellation Software, Harris Computer, Volaris,
+      Valsoft, Banyan Software, Roper Technologies]
+    priors: {rev_per_employee_usd: 170000, capital_intensity: 1, fragmentation: 4, tailwinds: 4, industry: 4, market_growth: 3}
+  - key: industrial_fieldservice_supplychain
+    description: >-
+      Software for industrial, field-service, fleet, dealer and supply-chain operations: dispatch and work orders,
+      asset and maintenance management, fleet and telematics back office, dealer management, warehouse and
+      transportation management, EDI and inventory.
+    inclusion_terms: [field service management software, work order software, CMMS, maintenance management software,
+      EAM software, asset management software, fleet management software, dispatch software, dealer management
+      system, DMS, warehouse management software, WMS, transportation management software, TMS, inventory
+      management software, EDI software, MRP software, manufacturing execution software, MES, route planning software]
+    product_terms: [work orders, preventive maintenance, dispatching, technician scheduling, GPS tracking,
+      parts inventory, service contracts, mobile app for technicians, barcode scanning, bill of materials,
+      shop floor, quoting, load planning, freight audit, yard management]
+    end_market_terms: [HVAC contractors, plumbing contractors, electrical contractors, equipment dealers,
+      manufacturers, distributors, trucking companies, 3PLs, utilities, municipalities, food distributors,
+      auto dealers, RV dealers, agricultural equipment dealers, rental companies]
+    customer_reference_terms: [trusted by, customers include, used by, case study]
+    business_model_indicators: [subscription, SaaS, per-user, per-vehicle, annual license, cloud-based, hosted,
+      maintenance contract]
+    exemplar_companies: []
+    false_positive_terms: [staffing, contractor, logistics provider, freight broker, hardware only, consulting only, reseller]
+    known_consolidators: [ServiceTitan, FieldEdge, Xplor, Service Fusion, EverCommerce, Housecall Pro, Jobber,
+      Samsara, Fleetio, Verizon Connect, Fleet Complete, Motive, Descartes, e2open, Kinaxis, MercuryGate,
+      Trimble, ECI Software Solutions, Epicor, Infor, CDK Global, Reynolds and Reynolds, Dealertrack, DealerSocket,
+      Solera, Fullbay, Aptean, Constellation Software, Volaris, Harris Computer, Jonas Software, Valsoft,
+      Banyan Software, Roper Technologies, Vista Equity, Thoma Bravo]
+    priors: {rev_per_employee_usd: 180000, capital_intensity: 1, fragmentation: 4, tailwinds: 4, industry: 4, market_growth: 3}
+  - key: finserv_insurance_public_sector
+    description: >-
+      Back-office and workflow software for community banks, credit unions, insurance agencies and carriers, wealth
+      and retirement advisors, and local governments: policy administration, agency management, loan servicing,
+      compliance and reporting, permitting, utility billing, court and records systems.
+    inclusion_terms: [agency management system, insurance software, policy administration software, claims
+      software, loan servicing software, loan origination software, core banking software, credit union software,
+      wealth management software, retirement plan software, financial planning software, trust accounting software,
+      govtech, government software, permitting software, utility billing software, court case management software,
+      records management software, tax software for municipalities, 401k administration software]
+    product_terms: [policy issuance, rating engine, claims adjudication, commissions, document generation,
+      regulatory filings, loan boarding, escrow, account aggregation, rebalancing, plan administration, permit
+      applications, citizen portal, meter data, docket management, land records, fund accounting]
+    end_market_terms: [independent insurance agencies, MGAs, regional carriers, community banks, credit unions,
+      RIAs, broker-dealers, TPAs, retirement plan administrators, counties, cities, school districts, public
+      utilities, courts, housing authorities]
+    customer_reference_terms: [trusted by, customers include, used by, case study]
+    business_model_indicators: [subscription, SaaS, annual license, per-user, cloud-based, hosted, maintenance contract]
+    exemplar_companies: []
+    false_positive_terms: [insurance agency, bank, credit union, RIA, consulting only, staffing, reseller, law firm]
+    known_consolidators: [Applied Systems, Vertafore, Duck Creek, Guidewire, Majesco, Sapiens, Insurity,
+      Zywave, EZLynx, Tyler Technologies, CentralSquare, OpenGov, Granicus, Accela, Envestnet, Orion Advisor,
+      SS&C, Black Knight, ICE Mortgage, Jack Henry, Fiserv, FIS, nCino, Q2, Alkami, MeridianLink, Finastra,
+      Constellation Software, Harris Computer, Volaris, Jonas Software, Valsoft, Banyan Software, Roper Technologies,
+      Vista Equity, Thoma Bravo]
+    priors: {rev_per_employee_usd: 185000, capital_intensity: 1, fragmentation: 4, tailwinds: 3, industry: 4, market_growth: 3}

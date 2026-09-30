@@ -1,0 +1,39 @@
+# Scoring weights v001. Values are 0-5 per component; weights per axis sum to 100.
+# kind: rule (deterministic from data) | llm (Claude with verbatim evidence) | thesis_constant (excluded from coverage)
+# Only no_institutional_capital may score from absence of evidence (4 @ 0.4). Everything else unknown = null.
+version: v001
+composite: geometric            # geometric: 100*sqrt(A*T); weighted: a_share*A + (1-a_share)*T
+attractiveness_share: 0.45
+tiers:
+  t1_min: 75
+  t2_min: 60
+  t3_min: 45
+  t1_min_conf: 0.6
+  t1_min_coverage: 60
+  provisional_coverage: 60
+  provisional_conf: 0.5
+  band_k: 25
+attractiveness:
+  industry_fit:        {weight: 10, kind: thesis_constant}
+  growth:              {weight: 12, kind: rule}
+  recurring_revenue:   {weight: 12, kind: llm}
+  mission_critical:    {weight: 10, kind: llm}
+  retention_evidence:  {weight: 6,  kind: llm}
+  fragmentation:       {weight: 8,  kind: thesis_constant}
+  moat:                {weight: 8,  kind: llm}
+  margins:             {weight: 8,  kind: rule}
+  capital_intensity:   {weight: 6,  kind: llm}
+  scalability:         {weight: 8,  kind: llm}
+  tailwinds:           {weight: 12, kind: thesis_constant}
+transactability:
+  founder_ownership:           {weight: 22, kind: rule}
+  founder_tenure:              {weight: 12, kind: rule}
+  no_institutional_capital:    {weight: 12, kind: rule}
+  ownership_duration:          {weight: 8,  kind: rule}
+  succession_indicators:       {weight: 6,  kind: llm}
+  size_fit:                    {weight: 12, kind: rule}
+  limited_acquisition_history: {weight: 6,  kind: rule}
+  management_changes:          {weight: 6,  kind: llm}
+  liquidity_signals:           {weight: 4,  kind: llm}
+  ownership_complexity:        {weight: 6,  kind: rule}
+  openness_evidence:           {weight: 6,  kind: rule}
