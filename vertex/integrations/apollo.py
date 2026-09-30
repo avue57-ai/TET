@@ -269,3 +269,37 @@ def select_primary(conn: sqlite3.Connection, company_id: int) -> tuple[int | Non
     reason = f"rank {best['role_rank']} ({best['title']})"
     conn.execute("UPDATE contacts SET is_primary = 1, selection_reason = ? WHERE id = ?", (reason, best["id"]))
     return int(best["id"]), reason
+
+
+# ---------------------------------------------------------------- saved account lists → existing-relationship holds
+def plan_crm_accounts(conn: sqlite3.Connection, label_id: str, label_name: str, pages: range, per_page: int = 100) -> list[int]:
+    """One job per page of apollo_mixed_companies_search filtered to a saved account list (1 credit per non-empty page)."""
+    return [enqueue(conn, "apollo", "apollo_mixed_companies_search",
+                    {"account_label_ids": [label_id], "page": p, "per_page": per_page}, "apollo.crm_accounts",
+                    context={"label_id": label_id, "label_name": label_name, "page": p}, est_credits=1, credit_type="apollo")
+            for p in pages]
+
+
+@register("apollo.crm_accounts")
+def ingest_crm_accounts(conn: sqlite3.Connection, job: dict[str, Any], payload: Any, batch_id: int | None = None, **kw: Any) -> dict[str, Any]:
+    from vertex.workflows.suppression import add_suppression
+
+    ctx = job.get("context") or {}
+    label = ctx.get("label_name") or ctx.get("label_id") or "list"
+    accounts = (payload.get("accounts") if isinstance(payload, dict) else None) or []
+    pag = (payload.get("pagination") if isinstance(payload, dict) else None) or {}
+    inserted = 0
+    domains: list[str] = []
+    for a in accounts:
+        d = normalize_domain(a.get("domain") or a.get("primary_domain") or a.get("website_url") or "")
+        if not d:
+            continue
+        domains.append(d)
+        inserted += int(add_suppression(conn, "domain", d, "existing_relationship", f"apollo_crm:{label[:40]}", expires_at=None, hold_for_human=True))
+    record_source(conn, "apollo_crm", f"{ctx.get('label_id')}:page{ctx.get('page')}", None,
+                  {"label": label, "page": ctx.get("page"), "total_pages": pag.get("total_pages"), "total_entries": pag.get("total_entries"), "domains": domains},
+                  batch_id=batch_id)
+    if job.get("backend") == "key" and pag.get("page") and pag.get("total_pages") and pag["page"] < pag["total_pages"]:
+        plan_crm_accounts(conn, ctx["label_id"], label, range(pag["page"] + 1, pag["page"] + 2), int(pag.get("per_page") or 100))
+    add_credit(conn, kw.get("run_id"), "apollo", "credits", 1 if accounts else 0, f"crm_accounts page {ctx.get('page')}")
+    return {"rows": len(accounts), "inserted": inserted, "skipped": len(accounts) - inserted, "total_entries": pag.get("total_entries")}

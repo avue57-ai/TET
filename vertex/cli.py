@@ -700,3 +700,85 @@ def suppression_plan_granola(time_range: str = "last_30_days") -> None:
     """Enqueue a Granola list_meetings job (Claude executes it); matched company names become held existing relationships."""
     from vertex.integrations.granola import plan_meetings
     console.print(json.dumps({"granola_job": plan_meetings(_conn(), time_range)}))
+
+
+@suppression_app.command("plan-apollo-crm")
+def suppression_plan_apollo_crm(label_id: str, label_name: str, first_page: int = 1, last_page: int = 1, per_page: int = 100) -> None:
+    """Enqueue Apollo saved-account-list pages (1 credit each) as existing-relationship holds."""
+    from vertex.integrations.apollo import plan_crm_accounts
+    jobs = plan_crm_accounts(_conn(), label_id, label_name, range(first_page, last_page + 1), per_page)
+    console.print(json.dumps({"jobs": jobs, "pages": [first_page, last_page]}))
+
+
+# ---------------------------------------------------------------- campaigns (draft only)
+@campaign_app.command("create")
+def campaign_create(thesis: str, arm: str = "linkedin_led", wave: int = 1, emoji: str = "🧭") -> None:
+    """Create a DRAFT Lemlist campaign for a thesis × wave × arm and enqueue its build jobs (steps follow via the bridge)."""
+    from vertex.workflows.campaign import create_campaign
+    cid, job = create_campaign(_conn(), thesis, arm, wave, emoji)
+    console.print(json.dumps({"campaign_id": cid, "job": job, "next": "vertex bridge next --connector lemlist"}))
+
+
+@campaign_app.command("finalize")
+def campaign_finalize(campaign_id: int) -> None:
+    """After all step jobs are done: senders, reply behaviour, folder, readiness check."""
+    from vertex.workflows.campaign import finalize
+    console.print(json.dumps({"jobs": finalize(_conn(), campaign_id)}))
+
+
+@campaign_app.command("show")
+def campaign_show(campaign_id: Optional[int] = None) -> None:
+    conn = _conn()
+    rows = conn.execute("SELECT * FROM campaigns" + (" WHERE id = ?" if campaign_id else "") + " ORDER BY id", (campaign_id,) if campaign_id else ()).fetchall()
+    for c in rows:
+        st = json.loads(c["build_state_json"] or "{}")
+        n = conn.execute("SELECT state, COUNT(*) AS n FROM enrollments WHERE campaign_id = ? GROUP BY state", (c["id"],)).fetchall()
+        rd = json.loads(c["readiness_json"] or "{}").get("result", {})
+        enr = ", ".join(f"{r['state']}: {r['n']}" for r in n) or "none"
+        readiness = rd.get("status", "-") if isinstance(rd, dict) else "-"
+        console.rule(f"[{c['id']}] {c['name']}  lemlist={c['lemlist_campaign_id']} state={c['lemlist_state']} launched={c['launched_at'] or '-'}")
+        console.print(f"arm={c['arm']} seq={c['sequence_version']} root_seq={st.get('root_seq')} branches={st.get('branches')} steps={len(st.get('steps', {}))} "
+                      f"ab={len(st.get('ab', []))} senders={len(st.get('senders', []))} settings={len(st.get('settings', []))} folder={len(st.get('folder', []))} "
+                      f"readiness={readiness} enrollments={enr}")
+
+
+@campaign_app.command("enroll")
+def campaign_enroll(campaign_id: int, contact: Optional[list[int]] = typer.Option(None, help="contact ids; default = every contact with an approving enroll decision"),
+                    channel_scope: str = "full", dry_run: bool = False) -> None:
+    """Run the gates and queue approved contacts into the draft campaign (Lemlist add_leads with deduplicate=true)."""
+    from vertex.core.gates import check_enrollment
+    from vertex.workflows.campaign import plan_enrollment
+    conn = _conn()
+    ids = list(contact) if contact else [r[0] for r in conn.execute(
+        "SELECT DISTINCT i.ref_id FROM review_items i JOIN review_decisions d ON d.review_item_id = i.id WHERE i.item_type = 'enroll' AND i.ref_table = 'contacts' AND d.decision = 'approve'")]
+    if dry_run:
+        for cid in ids:
+            ok, results, decision = check_enrollment(conn, cid, campaign_id, channel_scope)
+            console.print(f"contact {cid}: {'PASS' if ok else 'BLOCKED'} decision={decision} " + "; ".join(f"{r.name}={'ok' if r.passed else ('hold' if r.hold else 'FAIL')}{(' (' + r.detail + ')') if r.detail else ''}" for r in results))
+        return
+    console.print(json.dumps(plan_enrollment(conn, campaign_id, ids, channel_scope), default=str))
+
+
+@campaign_app.command("sync-state")
+def campaign_sync_state() -> None:
+    """Enqueue get_campaign_details for every engine campaign (detects a human launch)."""
+    from vertex.workflows.campaign import plan_state_sync
+    console.print(json.dumps({"jobs": plan_state_sync(_conn())}))
+
+
+@campaign_app.command("launch")
+def campaign_launch(campaign_id: int, i_have_reviewed: bool = typer.Option(False, "--i-have-reviewed")) -> None:
+    """Never launches. Prints the exact human step once the reviewer confirms they have reviewed the campaign."""
+    from vertex.workflows.campaign import launch_instructions
+    if not i_have_reviewed:
+        console.print("[yellow]Add --i-have-reviewed after reviewing every lead and message in Lemlist. The engine itself never launches campaigns.")
+        raise typer.Exit(1)
+    console.print(launch_instructions(_conn(), campaign_id))
+
+
+@campaign_app.command("mark-launched")
+def campaign_mark_launched(campaign_id: int, by: str = "human") -> None:
+    """Record that a human launched the campaign in Lemlist (pushed enrollments become active)."""
+    from vertex.workflows.campaign import mark_launched
+    mark_launched(_conn(), campaign_id, by)
+    console.print(f"campaign {campaign_id} marked launched by {by}")

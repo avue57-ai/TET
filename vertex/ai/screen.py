@@ -112,17 +112,17 @@ def keeper_rates(conn: sqlite3.Connection, thesis_id: int) -> list[dict[str, Any
     rows = conn.execute(
         "SELECT sq.id, sq.vertical, sq.query_kind, "
         "SUM(CASE WHEN tc.prescreen_status='keep' THEN 1 ELSE 0 END) AS keep, "
-        "SUM(CASE WHEN tc.prescreen_status='drop' THEN 1 ELSE 0 END) AS drop, "
+        "SUM(CASE WHEN tc.prescreen_status='drop' THEN 1 ELSE 0 END) AS drop_n, "
         "SUM(CASE WHEN tc.prescreen_status='unclear' THEN 1 ELSE 0 END) AS unclear "
         "FROM source_queries sq LEFT JOIN thesis_companies tc ON tc.source_query_id = sq.id AND tc.prescreen_status != 'pending' "
         "WHERE sq.thesis_id = ? GROUP BY sq.id", (thesis_id,),
     ).fetchall()
     out = []
     for r in rows:
-        judged = (r["keep"] or 0) + (r["drop"] or 0) + (r["unclear"] or 0)
+        judged = (r["keep"] or 0) + (r["drop_n"] or 0) + (r["unclear"] or 0)
         rate = (r["keep"] or 0) / judged if judged else None
         if rate is not None:
             conn.execute("UPDATE source_queries SET prescreen_keeper_rate = ? WHERE id = ?", (rate, r["id"]))
         out.append({"source_query_id": r["id"], "vertical": r["vertical"], "kind": r["query_kind"], "judged": judged,
-                    "keep": r["keep"] or 0, "drop": r["drop"] or 0, "unclear": r["unclear"] or 0, "keeper_rate": rate})
+                    "keep": r["keep"] or 0, "drop": r["drop_n"] or 0, "unclear": r["unclear"] or 0, "keeper_rate": rate})
     return out
