@@ -255,6 +255,7 @@ def ingest_bulk_match(conn: sqlite3.Connection, job: dict[str, Any], payload: An
                   "unverified": "unverified", "unavailable": "unavailable", "invalid": "invalid"}.get(status_raw, "unverified" if email else "unavailable")
         conf = {"verified": 0.9, "likely": 0.75, "unverified": 0.5, "unavailable": 0.0, "invalid": 0.0}[status]
         data = {
+            "apollo_person_id": pid,
             "email": email, "email_status": status, "email_confidence": conf,
             "first_name": m.get("first_name"), "last_name": m.get("last_name"), "title": m.get("title"),
             "linkedin_url": normalize_linkedin(m.get("linkedin_url")),
