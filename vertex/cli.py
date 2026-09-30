@@ -205,6 +205,28 @@ def bridge_fail(job_id: int, error: str) -> None:
     console.print(J.fail(conn, job_id, error))
 
 
+@bridge_app.command("sweep")
+def bridge_sweep(connector: Optional[str] = None) -> None:
+    """Complete every pending job whose result file already sits in data/inbox/<job_id>.json (idempotent)."""
+    from vertex.bridge.jobs import complete
+    from vertex.settings import get_settings
+    conn = _conn()
+    inbox = Path(get_settings().data_dir) / "inbox"
+    q = "SELECT id FROM bridge_jobs WHERE status IN ('pending','claimed')" + (" AND connector = ?" if connector else "") + " ORDER BY id"
+    done = failed = 0
+    for (jid,) in conn.execute(q, (connector,) if connector else ()).fetchall():
+        path = inbox / f"{jid}.json"
+        if not path.exists():
+            continue
+        try:
+            complete(conn, jid, path)
+            done += 1
+        except Exception as ex:
+            failed += 1
+            console.print(f"[red]job {jid}: {ex}")
+    console.print(json.dumps({"completed": done, "failed": failed}))
+
+
 @bridge_app.command("list")
 def bridge_list(status: str = "pending", limit: int = 50) -> None:
     conn = _conn()
@@ -814,6 +836,49 @@ def review_decide(ids: list[str], decision: str, reason: Optional[str] = None, b
     decs = [{"id": i, "decision": decision, **({"reason": reason} if reason else {})} for i in ids]
     for line in apply_decisions(_conn(), decs, by, "chat"):
         console.print(line)
+
+
+# ---------------------------------------------------------------- sync + replies
+@app.command("sync")
+def sync_cmd(since_hours: int = 24, all_campaigns: bool = False) -> None:
+    """Enqueue the engagement-sync jobs (stats, per-lead activities, inbox) for running engine campaigns."""
+    from vertex.workflows.sync import plan_sync
+    jobs = plan_sync(_conn(), since_hours, running_only=not all_campaigns)
+    console.print(json.dumps({"jobs": jobs, "next": "vertex bridge next --connector lemlist" if jobs else "no engine campaign is running"}))
+
+
+@replies_app.command("classify")
+def replies_classify(reply: Optional[list[int]] = typer.Option(None), no_llm: bool = False) -> None:
+    """Classify unclassified replies (rules first, then Claude); high-intent or low-confidence ones go to review."""
+    from vertex.ai.classify import classify_reply
+    conn = _conn()
+    ids = list(reply) if reply else [r[0] for r in conn.execute("SELECT id FROM replies WHERE predicted_class IS NULL ORDER BY id")]
+    for rid in ids:
+        console.print(json.dumps(classify_reply(conn, rid, use_llm=not no_llm), default=str))
+
+
+@replies_app.command("add")
+def replies_add(contact_id: int, text: str, channel: str = "email", ai_interest: Optional[int] = None) -> None:
+    """Record a reply by hand (e.g. pasted from the Lemlist inbox) and classify it."""
+    from vertex.ai.classify import classify_reply
+    from vertex.db.connection import utcnow
+    conn = _conn()
+    enr = conn.execute("SELECT id FROM enrollments WHERE contact_id = ? ORDER BY id DESC LIMIT 1", (contact_id,)).fetchone()
+    cur = conn.execute("INSERT INTO replies(enrollment_id, contact_id, lemlist_message_id, channel, received_at, text, ai_lead_interest) VALUES (?,?,?,?,?,?,?)",
+                       (enr["id"] if enr else None, contact_id, f"manual:{utcnow()}", channel, utcnow(), text, ai_interest))
+    console.print(json.dumps(classify_reply(conn, int(cur.lastrowid)), default=str))
+
+
+@replies_app.command("show")
+def replies_show(limit: int = 30) -> None:
+    conn = _conn()
+    t = Table(title="replies")
+    for c in ("id", "contact", "company", "class", "conf", "by", "final", "review", "actions"):
+        t.add_column(c)
+    for r in conn.execute("SELECT r.*, ct.first_name, ct.last_name, co.name AS company FROM replies r LEFT JOIN contacts ct ON ct.id = r.contact_id LEFT JOIN companies co ON co.id = ct.company_id ORDER BY r.id DESC LIMIT ?", (limit,)):
+        t.add_row(str(r["id"]), f"{r['first_name'] or ''} {r['last_name'] or ''}".strip(), (r["company"] or "")[:22], r["predicted_class"] or "", f"{r['predicted_confidence'] or 0:.2f}",
+                  r["classified_by"] or "", r["final_class"] or "", "" if r["human_reviewed"] else "pending", (r["auto_actions_json"] or "")[:40])
+    console.print(t)
 
 
 # ---------------------------------------------------------------- targets (accept / pass)
