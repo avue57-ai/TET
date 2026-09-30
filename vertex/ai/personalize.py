@@ -116,8 +116,11 @@ def generate_for_contact(conn: sqlite3.Connection, contact_id: int, thesis: Thes
     crit = None
     if critic:
         msgs = "\n\n".join(f"[{k}] subject: {s or ''}\n{b}" for k, (s, b) in steps.items())
-        crit = run_prompt(conn, "copy_critic", {"company_name": co["name"], "hook_type": hooks[0]["hook_type"],
-                                                 "hook_text": hooks[0]["text"], "messages": msgs}, Critique)
+        crit = run_prompt(conn, "copy_critic", {
+            "company_name": co["name"], "hq": payload["hq"], "company_summary": payload["company_summary"],
+            "hook_type": hooks[0]["hook_type"], "hook_text": hooks[0]["text"],
+            "backup_hook_text": payload["backup_hook_text"], "messages": msgs,
+        }, Critique)
     flags_total = sum(len(v) for v in lint.values())
     status = "draft" if flags_total == 0 and (crit is None or (crit.score >= 4 and not crit.sensitive_theme and not crit.claims_not_in_hook)) else "needs_edit"
     pv = prompt_version("personalize")

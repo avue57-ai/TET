@@ -5,24 +5,28 @@ steps:
   - {key: li_visit, type: linkedinVisit, delay: 0}
   - {key: li_like, type: linkedinLikeLastPost, delay: 1}
   - {key: li_note, type: linkedinInvite, delay: 1, message: "{{liNote}}", ab_no_note: true}
-  - {key: cond_accept, type: conditional, conditionKey: linkedinInviteAccepted, delayType: waitUntil, delay: 7,
-     accepted:
-       - {key: li_msg, type: linkedinSend, delay: 1, message: "{{liMsg}}"}
-       - {key: email1, type: email, delay: 5, subject: "{{email1Subject}}", message: "{{email1Body}}"}
-       - {key: email2, type: email, delay: 4, subject: "", message: "{{email2Body}}"}
-       - {key: email3, type: email, delay: 7, subject: "{{email3Subject}}", message: "{{email3Body}}"}
-       - {key: email5, type: email, delay: 14, subject: "", message: "{{email5Body}}"}
-     fallback:
-       - {key: email1, type: email, delay: 0, subject: "{{email1Subject}}", message: "{{email1Body}}"}
-       - {key: email2, type: email, delay: 4, subject: "", message: "{{email2Body}}"}
-       - {key: email3, type: email, delay: 4, subject: "{{email3Subject}}", message: "{{email3Body}}"}
-       - {key: email4, type: email, delay: 6, subject: "", message: "{{email4Body}}"}
-       - {key: email5, type: email, delay: 11, subject: "", message: "{{email5Body}}"}}
+  - key: cond_accept
+    type: conditional
+    conditionKey: linkedinInviteAccepted
+    delayType: waitUntil
+    delay: 7
+    accepted:
+      - {key: li_msg, type: linkedinSend, delay: 1, message: "{{liMsg}}"}
+      - {key: email1, type: email, delay: 5, subject: "{{email1Subject}}", message: "{{email1Body}}"}
+      - {key: email2, type: email, delay: 4, subject: "", message: "{{email2Body}}"}
+      - {key: email3, type: email, delay: 7, subject: "{{email3Subject}}", message: "{{email3Body}}"}
+      - {key: email5, type: email, delay: 14, subject: "", message: "{{email5Body}}"}
+    fallback:
+      - {key: email1, type: email, delay: 0, subject: "{{email1Subject}}", message: "{{email1Body}}"}
+      - {key: email2, type: email, delay: 4, subject: "", message: "{{email2Body}}"}
+      - {key: email3, type: email, delay: 4, subject: "{{email3Subject}}", message: "{{email3Body}}"}
+      - {key: email4, type: email, delay: 6, subject: "", message: "{{email4Body}}"}
+      - {key: email5, type: email, delay: 11, subject: "", message: "{{email5Body}}"}
 step_purposes:
   li_note: "Connection note, at most 180 characters, no pitch: one specific observation about the company."
   li_msg: "After connecting: the specific reason we noticed the company, who we represent in one sentence, one low-pressure question. At most 90 words."
   email1: "Day-1 email: open with the specific hook; one sentence on who the buyer is (anonymous, permanent capital, buys and holds, founder keeps running it); one CTA. 60-110 words."
   email2: "Short follow-up referencing the hook in one new way; 30-60 words; no subject (threads)."
-  email3: "Different angle: why this business model fits long-term ownership, using a second signal if available; new subject; 50-90 words."
+  email3: "Different angle: use the second signal (or another fact from the description) and say in one plain sentence why a long-term owner would suit the company, with no claims that are not in the material; new subject; 50-90 words."
   email4: "One-line bump, at most 25 words, no subject."
   email5: "Polite close that leaves the door open and offers to check back next year; 30-50 words; no subject."

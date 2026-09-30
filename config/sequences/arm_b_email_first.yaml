@@ -1,6 +1,6 @@
 version: email_first_v1
 arm: email_first
-description: Test arm per the user's spec: personalized email day 1, then follow-ups at day 4, 8, 14, 25 with LinkedIn visit/invite in parallel.
+description: "Test arm per the user's spec: personalized email day 1, then follow-ups at day 4, 8, 14, 25 with LinkedIn visit/invite in parallel."
 steps:
   - {key: email1, type: email, delay: 0, subject: "{{email1Subject}}", message: "{{email1Body}}", ab_subject_b: "{{email1SubjectB}}"}
   - {key: li_visit, type: linkedinVisit, delay: 1}
@@ -14,6 +14,6 @@ step_purposes:
   li_msg: "After connecting: the specific reason we noticed the company, who we represent in one sentence, one low-pressure question. At most 90 words."
   email1: "Day-1 email: open with the specific hook; one sentence on who the buyer is (anonymous, permanent capital, buys and holds, founder keeps running it); one CTA. 60-110 words."
   email2: "Short follow-up referencing the hook in one new way; 30-60 words; no subject (threads)."
-  email3: "Different angle: why this business model fits long-term ownership, using a second signal if available; new subject; 50-90 words."
+  email3: "Different angle: use the second signal (or another fact from the description) and say in one plain sentence why a long-term owner would suit the company, with no claims that are not in the material; new subject; 50-90 words."
   email4: "One-line bump, at most 25 words, no subject."
   email5: "Polite close that leaves the door open and offers to check back next year; 30-50 words; no subject."

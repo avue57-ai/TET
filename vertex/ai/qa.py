@@ -13,6 +13,7 @@ _LIMITS = {  # (min_words, max_words) or chars for li_note
 _DASH = re.compile(r"—|–|\s-\s")
 _BUYER_NAMES = re.compile(r"\b(elmore|emergence|family office of|our client [A-Z][a-z]+ [A-Z][a-z]+)\b", re.I)
 _PLACEHOLDER = re.compile(r"\{\{|\}\}|\[(name|company|first name)\]", re.I)
+_CALL_LENGTH = re.compile(r"\b\d+[- ]min(?:ute)?s?\b", re.I)   # the CTA's "15-minute call" is not a parroted fact
 
 
 def _load_banned() -> list[re.Pattern[str]]:
@@ -94,7 +95,7 @@ def lint_step(key: str, subject: str | None, body: str, hook_text: str, allowed_
             flags.append("hook_not_referenced")
     if key in ("email2", "email4", "email5") and subject:
         flags.append("subject_should_be_empty")
-    for num in re.findall(r"\b\d[\d,\.]*\b", body):
+    for num in re.findall(r"\b\d[\d,\.]*\b", _CALL_LENGTH.sub("", body)):
         if num not in allowed_numbers and len(num.replace(",", "")) >= 2:
             flags.append(f"number_parroted:{num}")
     return flags

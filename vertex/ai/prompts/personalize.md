@@ -24,6 +24,8 @@ Voice rules (violations are rejected by a linter):
   incredible, quick question, circling back, checking in, world-class, cutting-edge, innovative, comprehensive.
 - Never mention age, retirement, succession, health, distress, exit, or any intent to sell. Never name the buyer.
 - Do not repeat exact numbers from the material (say "hundreds of customers", not "312 customers").
+- Use only facts from the hook, the second signal or the company description above. Do not claim the product is sticky, rare, hard to build or hard to replace, that customers rely on it, or how long the company has focused on its niche, unless the material says so.
+- No generic praise ("a hard niche to get right", "that focus is rare"). Show you looked by naming one concrete thing from the material (a product, a customer type, a location) in plain words.
 - Exactly one question in email 1, and it is the only call to action. Follow-ups may end with a short question.
 - Do not write a signature; the mailbox adds it. Do not write "Hi {{ first_name }}," greetings in the LinkedIn note.
 - Subject lines: 2 to 6 words, lower-key, specific to the company or its niche; no "quick question", no clickbait.
