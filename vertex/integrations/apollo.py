@@ -173,6 +173,23 @@ def ingest_org_enrich(conn: sqlite3.Connection, job: dict[str, Any], payload: An
     return {"rows": len(orgs), "updated": updated, "matched": matched}
 
 
+def _company_by_org_name(name: str, pool: list[dict[str, Any]]) -> dict[str, Any] | None:
+    from rapidfuzz import fuzz
+
+    from vertex.core.normalize import normalize_name
+
+    n = normalize_name(name) or name.lower().strip()
+    for c in pool:
+        if c.get("name_norm") and c["name_norm"] == n:
+            return c
+    best, score = None, 0.0
+    for c in pool:
+        s = max(fuzz.token_set_ratio(n, c.get("name_norm") or ""), fuzz.partial_ratio(n, (c.get("domain") or "").split(".")[0]))
+        if s > score:
+            best, score = c, s
+    return best if score >= 85 else None
+
+
 def _people(payload: Any) -> list[dict[str, Any]]:
     if isinstance(payload, dict):
         out = []
@@ -188,13 +205,17 @@ def ingest_people_search(conn: sqlite3.Connection, job: dict[str, Any], payload:
                          run_id: int | None = None, **kw: Any) -> dict[str, Any]:
     people = _people(payload)
     stored = skipped = 0
+    # The MCP search response often carries only the organization name (no domain): match names against the
+    # companies this job searched for, exact on normalized name first, then fuzzy within that small set.
+    searched = job.get("args", {}).get("q_organization_domains_list") or []
+    pool = [dict(r) for r in conn.execute(
+        f"SELECT id, name, name_norm, domain FROM companies WHERE domain IN ({','.join('?' * len(searched))})", searched)] if searched else []
     for p in people:
         org = p.get("organization") or p.get("account") or {}
         dom = normalize_domain(org.get("primary_domain") or org.get("website_url") or org.get("domain"))
-        if not dom:
-            skipped += 1
-            continue
-        row = conn.execute("SELECT id FROM companies WHERE domain = ?", (dom,)).fetchone()
+        row = conn.execute("SELECT id FROM companies WHERE domain = ?", (dom,)).fetchone() if dom else None
+        if not row and org.get("name") and pool:
+            row = _company_by_org_name(org["name"], pool)
         if not row:
             skipped += 1
             continue

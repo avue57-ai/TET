@@ -58,7 +58,16 @@ def select_contacts(conn: sqlite3.Connection, thesis_id: int, company_ids: list[
                 stats["needs_owner_contact"] += 1
             else:
                 stats["selected"] += 1
-                rank = conn.execute("SELECT role_rank FROM contacts WHERE id = ?", (contact_id,)).fetchone()[0]
+                ct = conn.execute("SELECT role_rank, first_name, last_name, title FROM contacts WHERE id = ?", (contact_id,)).fetchone()
+                rank = ct["role_rank"]
+                # A founder/owner-titled executive is ownership evidence (one source → at best "med" when no funding rows exist).
+                co = conn.execute("SELECT ownership_type, investors_json, funding_rounds, capital_raised_total FROM companies WHERE id = ?", (cid,)).fetchone()
+                if rank is not None and rank <= 4 and (co["ownership_type"] or "unknown") == "unknown":
+                    funded = bool(co["investors_json"] and co["investors_json"] not in ("[]", "null")) or (co["funding_rounds"] or 0) > 0 or (co["capital_raised_total"] or 0) > 0
+                    conn.execute(
+                        "UPDATE companies SET ownership_type = 'founder', ownership_confidence = ?, ownership_detail = ?, founder_name = COALESCE(founder_name, ?), founder_title = COALESCE(founder_title, ?), founder_active = 1 WHERE id = ?",
+                        ("low" if funded else "med", f"founder-titled executive per Apollo: {ct['first_name']} {ct['last_name']}, {ct['title']}",
+                         f"{ct['first_name']} {ct['last_name']}".strip(), ct["title"], cid))
                 if rank is not None and rank > 7:
                     from vertex.db.repo import add_review_item
                     add_review_item(conn, "contact_choice", "contacts", contact_id, cid,
