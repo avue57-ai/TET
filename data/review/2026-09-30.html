@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertex Review 2026-09-30</title>
+<style>
+:root{--bg:#f6f5f2;--card:#ffffff;--ink:#1c1c1a;--muted:#6b6a66;--line:#e3e1dc;--accent:#1f5f8b;--ok:#2e7d4f;--warn:#b26a00;--bad:#b3261e;--hold:#7a5c00;--chip:#eef0f3;--bar:#d9d7d1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--muted:#a3a19b;--line:#2f2f2c;--accent:#7fb3d8;--ok:#7ed3a0;--warn:#f0b35c;--bad:#f28b82;--hold:#e0c060;--chip:#2a2a27;--bar:#3a3a36}}
+:root[data-theme="dark"]{--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--muted:#a3a19b;--line:#2f2f2c;--accent:#7fb3d8;--ok:#7ed3a0;--warn:#f0b35c;--bad:#f28b82;--hold:#e0c060;--chip:#2a2a27;--bar:#3a3a36}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 16px 80px}
+header{position:sticky;top:0;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line);z-index:5}
+h1{font-size:18px;margin:0 0 6px}h2{font-size:16px;margin:28px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.strip{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:13px}
+.strip b{color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+.card.decided-approve{border-color:var(--ok)}.card.decided-reject{border-color:var(--bad)}.card.decided-hold{border-color:var(--hold)}.card.decided-edit{border-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline}
+.id{font-weight:700;color:var(--accent);font-family:ui-monospace,Menlo,monospace}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:1px 8px;font-size:12px;color:var(--muted);margin-right:4px}
+.chip.ok{color:var(--ok)}.chip.warn{color:var(--warn)}.chip.bad{color:var(--bad)}
+.bar{height:8px;background:var(--bar);border-radius:4px;overflow:hidden;width:140px;display:inline-block;vertical-align:middle}
+.bar i{display:block;height:100%;background:var(--accent)}
+.muted{color:var(--muted);font-size:13px}
+blockquote{margin:6px 0;padding:4px 10px;border-left:3px solid var(--line);color:var(--muted);font-size:13px}
+textarea{width:100%;min-height:90px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit;resize:vertical}
+textarea[readonly]{border-color:transparent;background:var(--chip)}
+details{margin:6px 0}summary{cursor:pointer;color:var(--muted);font-size:13px}
+.actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit;font-size:13px}
+button.on{outline:2px solid var(--accent)}
+select,input[type=text]{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px;font:inherit;font-size:13px;max-width:100%}
+.footer{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#out{width:100%;min-height:70px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.step{margin:8px 0}.step .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.flags{font-size:12px;color:var(--warn)}
+.evd{font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>Vertex review · 2026-09-30 · b2b_vertical_software</h1>
+<div class="strip">
+<span>Credits today: <b>0</b></span><span>Claude spend: <b>$33.43</b></span>
+<span>Mailbox headroom: <b>10/day</b></span><span>Campaigns: <b>none</b></span>
+<span>Universe: <b>Screened 352, Excluded 125, Qualified 50</b></span><span>Suppression: <b>2944</b></span>
+</div>
+</header>
+
+<h2>A · Replies needing you (0)</h2>
+<p class="muted">No replies waiting. Nothing has been sent yet.</p>
+
+
+<h2>B · Ready to enroll (0)</h2>
+<p class="muted">Approve = every step approved for this contact; Edit = edits are saved verbatim and approved; Hold = keep for later; Reject = never contact (give a reason). Nothing is pushed to Lemlist until you approve, and nothing is sent until you launch.</p>
+
+
+
+<h2>C · Targets to accept (50)</h2>
+<p class="muted">Engine-proposed targets. Pass = never worked for this thesis (give a reason). Accepted targets get enrichment and contact discovery.</p>
+
+<table><tr><th>id</th><th>company</th><th>vertical</th><th>score</th><th>ownership</th><th>size</th><th>why it matched</th><th>decision</th></tr>
+
+<tr data-id="T1" data-kind="accept_target"><td class="id">T1</td><td><b>MVP One</b><br><span class="muted">mvpone.com · Chicago, IL · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>88 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>96 emp</td><td class="muted">MVP One develops and sells a CMMS (maintenance and asset management software with work orders and inventory control) for manufacturing and food and beverage, which matches the thesis.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T2" data-kind="accept_target"><td class="id">T2</td><td><b>Windsor Solutions</b><br><span class="muted">windsorsolutions.com · Tigard, OR · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>88 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>92 emp</td><td class="muted">Develops and sells modular environmental compliance and regulatory reporting software, but it is sold to regulatory agencies rather than to regulated companies, so the fit is only partial.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T3" data-kind="accept_target"><td class="id">T3</td><td><b>Claimpower, Inc.</b><br><span class="muted">claimpower.com · Glen Rock, NJ · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>86 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 56%</span></td>
+<td>family (med)<br><span class="muted">“INVEN OWNERSHIP DETAIL: inven ownership_type=family_owned”</span></td>
+<td>90 emp</td><td class="muted">Claimpower offers medical billing, EHR and practice management solutions to independent practices, which fits the practice management/EHR software vertical, though the material does not confirm it develops its own software or has recurring revenue.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T4" data-kind="accept_target"><td class="id">T4</td><td><b>Smart Service</b><br><span class="muted">smartservice.com · Dublin, OH · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>86 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>143 emp</td><td class="muted">Smart Service develops and sells field service management software (scheduling, invoicing, dispatch) for HVAC and plumbing trades, matching the field-service software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T5" data-kind="accept_target"><td class="id">T5</td><td><b>ProScore Technologies</b><br><span class="muted">proscore.ai · Austin, TX · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>86 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 33%</span></td>
+<td>unknown (low)</td>
+<td>74 emp</td><td class="muted">Described as a compliance management company offering IRA compliance frameworks, apprenticeship programs and reporting, but the material does not say whether it sells software or is a consultancy/workforce-development provider.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T6" data-kind="accept_target"><td class="id">T6</td><td><b>Liberty Software</b><br><span class="muted">libertysoftware.com · Southlake, TX · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>86 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 42%</span></td>
+<td>unknown (low)</td>
+<td>120 emp</td><td class="muted">Liberty Software develops and sells a pharmacy management software platform (patient messaging, med sync, clinical safety checks), which is vertical software for a healthcare practice-type setting.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T7" data-kind="accept_target"><td class="id">T7</td><td><b>ChemicalSafety</b><br><span class="muted">chemicalsafety.com · Las Vegas, NV · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>85 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>73 emp</td><td class="muted">The company develops and sells EHS software for chemical and hazardous waste management and regulatory compliance, which matches the compliance/EHS software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T8" data-kind="accept_target"><td class="id">T8</td><td><b>Verdantis</b><br><span class="muted">verdantis.com · Princeton, NJ · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>85 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>82 emp</td><td class="muted">Verdantis develops and sells AI-driven master data management software for MRO and asset-heavy industries (oil and gas, manufacturing, utilities), which sits within asset, maintenance and inventory management software.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T9" data-kind="accept_target"><td class="id">T9</td><td><b>Dexur</b><br><span class="muted">dexur.com · Orlando, FL · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>85 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 42%</span></td>
+<td>unknown (low)</td>
+<td>88 emp</td><td class="muted">Dexur develops and sells software for quality, safety, risk and incident management to healthcare organizations, which is compliance/quality software for a regulated vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T10" data-kind="accept_target"><td class="id">T10</td><td><b>SRS Web Solutions, Inc</b><br><span class="muted">srswebsolutions.com · Ramsey, MN · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>85 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 35%</span></td>
+<td>unknown (low)</td>
+<td>92 emp</td><td class="muted">The description says the company provides software for patient management and documentation to dental and medical practices, which is practice management software in the target vertical, though recurring revenue is not stated.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T11" data-kind="accept_target"><td class="id">T11</td><td><b>YuJa</b><br><span class="muted">yuja.com · San Jose, CA · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>85 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>167 emp</td><td class="muted">YuJa develops and sells accessibility, captioning and video-management software (recurring SaaS) that helps regulated institutions such as higher education, K-12 and government agencies meet digital compliance requirements.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T12" data-kind="accept_target"><td class="id">T12</td><td><b>Eyeride</b><br><span class="muted">eyeride.io · Austin, TX · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>85 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.17 · cov 35%</span></td>
+<td>unknown (low)</td>
+<td>52 emp</td><td class="muted">The material describes EYERIDE as a digital platform providing fleet management software (telematics, real-time tracking) for trucking and transit, though it also mentions passenger services and possible hardware.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T13" data-kind="accept_target"><td class="id">T13</td><td><b>iCareManager</b><br><span class="muted">icaremanager.com · Columbia, MD · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>84 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>90 emp</td><td class="muted">iCareManager develops and sells EHR/care-management software with billing and assessments for healthcare providers, consistent with home-health and behavioral-health platform software.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T14" data-kind="accept_target"><td class="id">T14</td><td><b>Saince, Inc.</b><br><span class="muted">saince.com · Alpharetta, GA · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>84 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 37%</span></td>
+<td>unknown (low)</td>
+<td>114 emp</td><td class="muted">The description calls Saince a healthcare IT solutions provider for clinical documentation improvement, mobile diagnostics and patient outreach, but does not say whether it develops and sells its own software or delivers recurring software-enabled services, and its customers are hospitals and physician offices, not clearly the practice, clinic or lab software niche.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T15" data-kind="accept_target"><td class="id">T15</td><td><b>Mdt</b><br><span class="muted">mdtmi.com · Farmington Hills, MI · <span class="chip">pre-accepted</span></span></td>
+<td>finserv_insurance_public_sector</td><td>84 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>162 emp</td><td class="muted">MDT is a CUSO that provides core processing and digital solutions to credit unions, which suggests a software-enabled service in the credit union vertical, though the material does not say whether it develops its own software or resells third-party cores.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T16" data-kind="accept_target"><td class="id">T16</td><td><b>ABIS, Inc.</b><br><span class="muted">abiscorp.com · Houston, TX · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>84 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 40%</span></td>
+<td>unknown (low)</td>
+<td>36 emp</td><td class="muted">ABIS develops and sells business process management software for steel producers and processors, a vertical industrial/supply-chain operations software product.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T17" data-kind="accept_target"><td class="id">T17</td><td><b>Points North</b><br><span class="muted">points-north.com · Bloomington, MN · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>81 emp</td><td class="muted">Points North develops and sells payroll and compliance software (certified payroll reporting, ACA compliance) that regulated employers use for regulatory reporting, which is compliance software in this vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T18" data-kind="accept_target"><td class="id">T18</td><td><b>Basic Software Systems</b><br><span class="muted">basic-software.com · Texarkana, TX · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>25 emp</td><td class="muted">Develops and sells Primus, a cloud-based ERP/dealer management system for equipment dealerships, which matches the dealer management and inventory software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T19" data-kind="accept_target"><td class="id">T19</td><td><b>Pcms</b><br><span class="muted">pcmstech.com · Dallas, TX · <span class="chip">pre-accepted</span></span></td>
+<td>finserv_insurance_public_sector</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>134 emp</td><td class="muted">PCMS develops and sells cloud-based policy administration, claims and billing software to small and mid-size P&amp;C insurance carriers, which matches the insurance carrier back-office software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T20" data-kind="accept_target"><td class="id">T20</td><td><b>MEDNET Labs</b><br><span class="muted">mednetlabs.com · Cupertino, CA · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.23 · cov 45%</span></td>
+<td>unknown (low)</td>
+<td>88 emp</td><td class="muted">Mednet Labs develops and sells hospital information management software (EMR, PACS, LIS), including laboratory information systems, which fits the clinic/lab software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T21" data-kind="accept_target"><td class="id">T21</td><td><b>NEXGEN Asset Management</b><br><span class="muted">nexgenam.com · Sacramento, CA · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.17 · cov 35%</span></td>
+<td>unknown (low)</td>
+<td>38 emp</td><td class="muted">NEXGEN develops and sells EAM and CMMS asset and maintenance management software with mobile apps, which matches the thesis vertical, though training is a side offering.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T22" data-kind="accept_target"><td class="id">T22</td><td><b>Mismo</b><br><span class="muted">mismo.co · Los Angeles, CA · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 37%</span></td>
+<td>unknown (low)</td>
+<td>108 emp</td><td class="muted">Description says Mismo is an &#39;HR consulting company&#39; offering a web-based risk management and incident reporting platform, so it may sell software but the material does not confirm it develops and sells recurring software, and HR incident reporting is only loosely tied to compliance/EHS.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T23" data-kind="accept_target"><td class="id">T23</td><td><b>Moraware</b><br><span class="muted">moraware.com · Reno, NV · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>83 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 40%</span></td>
+<td>unknown (low)</td>
+<td>28 emp</td><td class="muted">Moraware develops and sells its own software (CounterGo, Systemize, Inventory) for quoting, job workflow and inventory management for countertop fabricators, a vertical operations-software niche.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T24" data-kind="accept_target"><td class="id">T24</td><td><b>S3</b><br><span class="muted">s3.com · Austin, TX · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>94 emp</td><td class="muted">S3 develops and sells compliance and regulatory reporting software for broker-dealers and trading firms, which fits the regulated-company compliance and regulatory reporting software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T25" data-kind="accept_target"><td class="id">T25</td><td><b>eVero Corporation</b><br><span class="muted">evero.com · Melville, NY · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 54%</span></td>
+<td>unknown (low)</td>
+<td>97 emp</td><td class="muted">eVero develops and sells a SaaS platform (EHR, self-direction, billing) to health and human services agencies serving IDD populations, matching the home-health/behavioral-health platform vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T26" data-kind="accept_target"><td class="id">T26</td><td><b>NextAxiom</b><br><span class="muted">nextaxiom.com · San Francisco, CA · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>34 emp</td><td class="muted">NextAxiom sells a software platform (Dynamic Work Execution Platform) for energy and utilities operational efficiency, safety and compliance, but the material does not show it is a compliance/EHS/quality/audit/regulatory-reporting product rather than a general work-execution or integration platform with services.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T27" data-kind="accept_target"><td class="id">T27</td><td><b>CapMinds</b><br><span class="muted">capminds.com · Leesburg, VA · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>92 emp</td><td class="muted">The description mentions EHR systems, interoperability and custom software development plus consulting, but does not show whether CapMinds sells its own recurring-revenue software product or mainly works as a services and consulting firm.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T28" data-kind="accept_target"><td class="id">T28</td><td><b>impac Fleet Management</b><br><span class="muted">impacfleet.com · Spring, TX · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.09 · cov 22%</span></td>
+<td>unknown (low)</td>
+<td>32 emp</td><td class="muted">The description mentions fuel management, telematics and safety solutions for fleets, but does not say whether the company develops and sells its own software or resells third-party telematics and fuel services.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T29" data-kind="accept_target"><td class="id">T29</td><td><b>WRS Health</b><br><span class="muted">wrshealth.com · Goshen, NY · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>131 emp</td><td class="muted">WRS Health develops and sells specialty EHR and practice management software for medical practices, matching the practice/clinic software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T30" data-kind="accept_target"><td class="id">T30</td><td><b>InfoIMAGE, Inc.</b><br><span class="muted">infoimageinc.com · Brisbane, CA · <span class="chip">pre-accepted</span></span></td>
+<td>finserv_insurance_public_sector</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 40%</span></td>
+<td>unknown (low)</td>
+<td>144 emp</td><td class="muted">InfoIMAGE provides electronic document delivery and printing services to banks and credit unions, which is adjacent to the thesis, but the material does not show whether it develops and sells recurring software or is mainly a print and mail services business.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T31" data-kind="accept_target"><td class="id">T31</td><td><b>ITS Inc.</b><br><span class="muted">its-training.com · Murray, KY · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 49%</span></td>
+<td>unknown (low)</td>
+<td>90 emp</td><td class="muted">The company offers compliance management software alongside training and evaluator services, so it plausibly develops and sells compliance software, though it may be mainly a training provider.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T32" data-kind="accept_target"><td class="id">T32</td><td><b>Health Care Systems, Inc.</b><br><span class="muted">hcsinc.net · Montgomery, AL · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>83 emp</td><td class="muted">The company develops and sells behavioral health EMR and revenue cycle management software to psychiatric hospitals and treatment centers, which fits the behavioral-health platform vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T33" data-kind="accept_target"><td class="id">T33</td><td><b>Hoptek</b><br><span class="muted">hoptek.ai · Atlanta, GA · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 30%</span></td>
+<td>unknown (low)</td>
+<td>33 emp</td><td class="muted">Hoptek develops and sells AI-powered fleet management software for trucking companies, which matches the fleet and transportation software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T34" data-kind="accept_target"><td class="id">T34</td><td><b>Servos</b><br><span class="muted">servos.io · Richmond, VA · <span class="chip">pre-accepted</span></span></td>
+<td>finserv_insurance_public_sector</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 42%</span></td>
+<td>unknown (low)</td>
+<td>89 emp</td><td class="muted">Servos appears to develop and sell software systems (child welfare, licensing, grants management) to state and local governments, which fits the local-government back-office/workflow software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T35" data-kind="accept_target"><td class="id">T35</td><td><b>AssurX</b><br><span class="muted">assurx.com · Reno, NV · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>53 emp</td><td class="muted">AssurX develops and sells enterprise quality management software for regulated industries such as pharmaceuticals and energy, which matches the compliance/quality software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T36" data-kind="accept_target"><td class="id">T36</td><td><b>Impact Systems</b><br><span class="muted">impactsystems.com · Greenville, DE · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>94 emp</td><td class="muted">Impact Systems appears to develop and sell cloud and on-premise software for compliance training, quality data and document management, serving regulated life sciences and pharma customers.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T37" data-kind="accept_target"><td class="id">T37</td><td><b>Asset Panda</b><br><span class="muted">assetpanda.com · Frisco, TX · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 43%</span></td>
+<td>unknown (low)</td>
+<td>111 emp</td><td class="muted">Asset Panda develops and sells cloud-based, subscription asset tracking and management software, which matches the asset and maintenance management software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T38" data-kind="accept_target"><td class="id">T38</td><td><b>Passport Workforce</b><br><span class="muted">passportworkforce.com · Warwick, NY · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>82 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 49%</span></td>
+<td>unknown (low)</td>
+<td>40 emp</td><td class="muted">Passport Workforce develops and sells SaaS workforce management software (scheduling, payroll compliance, data collection) for field crews in construction, transportation and manufacturing, which is close to the field-service and industrial operations software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T39" data-kind="accept_target"><td class="id">T39</td><td><b>QT9 Software</b><br><span class="muted">qt9software.com · Aurora, IL · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>69 emp</td><td class="muted">QT9 develops and sells quality management, ERP and MRP software to regulated industries, which matches the compliance/quality software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T40" data-kind="accept_target"><td class="id">T40</td><td><b>BestNotes</b><br><span class="muted">bestnotes.com · Twin Falls, ID · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>43 emp</td><td class="muted">BestNotes develops and sells EHR/EMR software for behavioral health and addiction treatment providers, squarely within the behavioral-health platform vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T41" data-kind="accept_target"><td class="id">T41</td><td><b>BayaTree</b><br><span class="muted">bayatree.com · Salt Lake City, UT · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 35%</span></td>
+<td>unknown (low)</td>
+<td>99 emp</td><td class="muted">The material describes healthcare software and app development services but does not say whether BayaTree sells its own recurring-revenue product or is a custom-development consultancy, nor whether it serves the practice/clinic/lab niche.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T42" data-kind="accept_target"><td class="id">T42</td><td><b>CHAMPS Software, Inc.</b><br><span class="muted">champsinc.com · Crystal River, FL · <span class="chip">pre-accepted</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>35 emp</td><td class="muted">CHAMPS develops and sells CMMS/EAM maintenance management software, which falls under asset and maintenance management in the thesis vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T43" data-kind="accept_target"><td class="id">T43</td><td><b>Pirani</b><br><span class="muted">piranirisk.com · Miami, FL · <span class="chip">pre-accepted</span></span></td>
+<td>compliance_ehs_quality</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 49%</span></td>
+<td>unknown (low)</td>
+<td>144 emp</td><td class="muted">Pirani develops and sells SaaS risk and compliance management software to regulated industries such as finance and healthcare, which matches the compliance software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T44" data-kind="accept_target"><td class="id">T44</td><td><b>ezEMRx</b><br><span class="muted">ezemrx.com · Roselle, IL · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>54 emp</td><td class="muted">ezEMRx develops and sells EHR, practice management, medical billing and patient portal software for clinics and health departments, matching the practice/clinic software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T45" data-kind="accept_target"><td class="id">T45</td><td><b>Psyquel</b><br><span class="muted">psyquel.com · San Antonio, TX · <span class="chip">pre-accepted</span></span></td>
+<td>healthcare_lifesci_software</td><td>81 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 46%</span></td>
+<td>unknown (low)</td>
+<td>27 emp</td><td class="muted">Psyquel develops and sells billing and practice management software for mental health providers, which matches the behavioral-health practice management software vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T46" data-kind="accept_target"><td class="id">T46</td><td><b>i3screen</b><br><span class="muted">i3screen.com · Denver, CO · <span class="chip">pre-accepted</span> · <span class="chip">exploration</span></span></td>
+<td>compliance_ehs_quality</td><td>76 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.13 · cov 42%</span></td>
+<td>unknown (low)</td>
+<td>54 emp</td><td class="muted">The description shows a web-based screening management platform but does not say whether i3screen develops its own software with recurring revenue or is mainly an occupational health services provider (drug testing, medical reviews, physical exams).</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T47" data-kind="accept_target"><td class="id">T47</td><td><b>Consis International</b><br><span class="muted">consisint.com · Davie, FL · <span class="chip">pre-accepted</span> · <span class="chip">exploration</span></span></td>
+<td>finserv_insurance_public_sector</td><td>79 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 40%</span></td>
+<td>unknown (low)</td>
+<td>143 emp</td><td class="muted">Consis develops and sells its own insurance carrier software (Acsel-e, Acsel Suite, Acsel Mobile), which fits the policy administration vertical software thesis.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T48" data-kind="accept_target"><td class="id">T48</td><td><b>Adroit Infosystems</b><br><span class="muted">adroitinfosystems.com · South Jordan, UT · <span class="chip">pre-accepted</span> · <span class="chip">exploration</span></span></td>
+<td>healthcare_lifesci_software</td><td>75 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 41%</span></td>
+<td>unknown (low)</td>
+<td>67 emp</td><td class="muted">Adroit develops and sells healthcare software (eHospital and eClinic Systems) plus revenue cycle services, but its focus on hospitals and diagnostic centers is broader than the thesis&#39;s practice, clinic and lab software niche. The material does not say whether the revenue is recurring.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T49" data-kind="accept_target"><td class="id">T49</td><td><b>Gridline, Inc.</b><br><span class="muted">gridline.com · Scottsdale, AZ · <span class="chip">pre-accepted</span> · <span class="chip">exploration</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>67 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.16 · cov 42%</span></td>
+<td>unknown (low)</td>
+<td>40 emp</td><td class="muted">Gridline describes itself as providing telematics and analytics solutions for fleet management, which suggests it develops and sells fleet/telematics software, though the material doesn&#39;t confirm recurring software revenue or rule out hardware/reselling.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+
+<tr data-id="T50" data-kind="accept_target"><td class="id">T50</td><td><b>Highway 905</b><br><span class="muted">highway905.com · Hillsborough, NJ · <span class="chip">pre-accepted</span> · <span class="chip">exploration</span></span></td>
+<td>industrial_fieldservice_supplychain</td><td>80 T2<br><span class="muted">provisional</span><br><span class="muted">conf 0.19 · cov 49%</span></td>
+<td>unknown (low)</td>
+<td>49 emp</td><td class="muted">The description says it provides cloud-based warehouse and transportation management systems, which are supply-chain execution software within the thesis vertical.</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option><option>pe_backed</option><option>wrong_size</option><option>wrong_industry</option><option>subsidiary</option><option>bad_contact</option><option>weak_hook</option><option>tone</option><option>existing_relationship</option><option>other</option></select></div></td></tr>
+</table>
+
+<h2>D · Exceptions and proposals (0)</h2>
+
+<p class="muted">None.</p>
+
+<div class="footer"><button id="copy">Copy decisions</button><button id="theme">Theme</button><span class="muted" id="count">0 decisions</span><textarea id="out" readonly placeholder="Decisions JSON appears here. Paste it back to Claude or save it as data/review/decisions/2026-09-30.json"></textarea></div>
+<script>
+(function(){
+const dec = {};
+const date = "2026-09-30";
+function collect(card){
+  const id = card.dataset.id, d = dec[id] || {id: id};
+  const reason = card.querySelector('select[data-field=reason]'); if (reason && reason.value) d.reason = reason.value;
+  const cls = card.querySelector('select[data-field=class]'); if (cls && cls.value) d.class = cls.value;
+  const swap = card.querySelector('select[data-field=swap_contact]'); if (swap && swap.value) d.contact_id = Number(swap.value);
+  const edits = {};
+  card.querySelectorAll('[data-step]').forEach(el => { if (el.dataset.orig !== undefined && el.value !== el.dataset.orig) edits[el.dataset.step + ':' + el.dataset.part] = el.value; });
+  const draft = card.querySelector('textarea[data-field=reply_draft]'); if (draft && draft.dataset.orig !== undefined && draft.value !== draft.dataset.orig) edits['reply_draft'] = draft.value;
+  if (Object.keys(edits).length) d.edits = edits;
+  return d;
+}
+function render(){
+  const list = Object.values(dec).filter(d => d.decision);
+  document.getElementById('count').textContent = list.length + ' decisions';
+  document.getElementById('out').value = JSON.stringify({date: date, decisions: list}, null, 1);
+  try { localStorage.setItem('vx-review-' + date, JSON.stringify(dec)); } catch (e) {}
+}
+document.querySelectorAll('[data-id]').forEach(card => {
+  card.querySelectorAll('[data-step], textarea[data-field=reply_draft]').forEach(el => { el.dataset.orig = el.value; });
+  card.querySelectorAll('button[data-d]').forEach(btn => btn.addEventListener('click', () => {
+    const id = card.dataset.id; const d = collect(card); d.decision = btn.dataset.d; d.kind = card.dataset.kind; dec[id] = d;
+    card.querySelectorAll('button[data-d]').forEach(b => b.classList.toggle('on', b === btn));
+    card.className = card.className.replace(/decided-\w+/g, '').trim() + ' decided-' + btn.dataset.d;
+    if (btn.dataset.d === 'edit') card.querySelectorAll('[data-step], textarea[data-field=reply_draft]').forEach(el => { el.removeAttribute('readonly'); const det = el.closest('details'); if (det) det.open = true; });
+    render();
+  }));
+  card.querySelectorAll('select, textarea, input').forEach(el => el.addEventListener('input', () => { if (dec[card.dataset.id]) { const keep = dec[card.dataset.id].decision; dec[card.dataset.id] = collect(card); dec[card.dataset.id].decision = keep; dec[card.dataset.id].kind = card.dataset.kind; render(); } }));
+});
+const clean = document.getElementById('approve-clean');
+if (clean) clean.addEventListener('click', () => { document.querySelectorAll('.card[data-kind=enroll]').forEach(card => { if (!card.querySelector('.flags')) { const b = card.querySelector('button[data-d=approve]'); if (b && !dec[card.dataset.id]) b.click(); } }); });
+document.getElementById('copy').addEventListener('click', () => { render(); const t = document.getElementById('out'); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } });
+document.getElementById('theme').addEventListener('click', () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark'; });
+try { const saved = JSON.parse(localStorage.getItem('vx-review-' + date) || '{}'); Object.keys(saved).forEach(id => { const card = document.querySelector('[data-id="' + id + '"]'); if (card && saved[id].decision) { const b = card.querySelector('button[data-d=' + saved[id].decision + ']'); if (b) b.click(); } }); } catch (e) {}
+render();
+})();
+</script>
+</body>
+</html>

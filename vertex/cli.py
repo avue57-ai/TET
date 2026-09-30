@@ -449,8 +449,13 @@ if __name__ == "__main__":  # pragma: no cover
 # ---------------------------------------------------------------- enrichment / contacts
 
 def _targets(conn, thesis: str, tiers: str, limit: int, keepers_only: bool):
+    """Accepted targets (stage Qualified+) when any exist; otherwise the top keepers by tier/score."""
     from vertex.workflows.enrich import target_company_ids
+    from vertex.workflows.targets import accepted_company_ids
     trow = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()
+    accepted = accepted_company_ids(conn, trow["id"], limit)
+    if accepted:
+        return trow["id"], accepted
     return trow["id"], target_company_ids(conn, trow["id"], tiers.split(","), keepers_only, limit)
 
 
@@ -782,3 +787,79 @@ def campaign_mark_launched(campaign_id: int, by: str = "human") -> None:
     from vertex.workflows.campaign import mark_launched
     mark_launched(_conn(), campaign_id, by)
     console.print(f"campaign {campaign_id} marked launched by {by}")
+
+
+# ---------------------------------------------------------------- review page + decisions
+@review_app.command("render")
+def review_render(thesis: str, date: Optional[str] = None) -> None:
+    """Build the single-page HTML review (sections A-D) under data/review/<date>.html."""
+    from vertex.workflows.review import render
+    path = render(_conn(), thesis, date)
+    console.print(str(path))
+
+
+@review_app.command("apply")
+def review_apply(file: Path, by: str = "human", source: str = "page") -> None:
+    """Apply a decisions JSON ({"date":..., "decisions":[{"id":"E3","decision":"approve"}, ...]})."""
+    from vertex.workflows.review import apply_decisions
+    data = json.loads(Path(file).read_text(encoding="utf-8"))
+    for line in apply_decisions(_conn(), data.get("decisions", data if isinstance(data, list) else []), by, source):
+        console.print(line)
+
+
+@review_app.command("decide")
+def review_decide(ids: list[str], decision: str, reason: Optional[str] = None, by: str = "human") -> None:
+    """Terse decisions from chat: vertex review decide E1 E2 E3 --decision approve; vertex review decide T7 --decision reject --reason pe_backed."""
+    from vertex.workflows.review import apply_decisions
+    decs = [{"id": i, "decision": decision, **({"reason": reason} if reason else {})} for i in ids]
+    for line in apply_decisions(_conn(), decs, by, "chat"):
+        console.print(line)
+
+
+# ---------------------------------------------------------------- targets (accept / pass)
+targets_app = typer.Typer(help="Target acceptance: propose top-scored keepers, record decisions")
+app.add_typer(targets_app, name="targets")
+
+
+@targets_app.command("propose")
+def targets_propose(thesis: str, top: int = 50, exploration_pct: float = 0.10, per_vertical_cap: Optional[int] = None) -> None:
+    """Create pending accept_target review items (Section C) for the top-scored keepers plus an exploration cohort."""
+    from vertex.workflows.targets import propose_targets
+    conn = _conn()
+    tid = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()["id"]
+    items = propose_targets(conn, tid, top, exploration_pct, per_vertical_cap)
+    console.print(json.dumps({"review_items": len(items)}))
+
+
+@targets_app.command("accept-pending")
+def targets_accept_pending(thesis: str, by: str = "system", source: str = "cli", note: str = "wave-1 initial objective: engine pre-acceptance, reversible on the review page") -> None:
+    """Approve every pending accept_target item (engine pre-acceptance for wave 1; humans reverse on the review page)."""
+    from vertex.workflows.targets import accept_pending
+    conn = _conn()
+    tid = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()["id"]
+    console.print(json.dumps({"decisions": len(accept_pending(conn, tid, by, source, note))}))
+
+
+@targets_app.command("decide")
+def targets_decide(thesis: str, domain: str, decision: str, reason: Optional[str] = None, note: Optional[str] = None, by: str = "human") -> None:
+    """approve | reject (with a reason code: pe_backed, wrong_size, wrong_industry, subsidiary, bad_contact, weak_hook, tone, other) | hold."""
+    from vertex.workflows.targets import decide_target
+    conn = _conn()
+    tid = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()["id"]
+    cid = conn.execute("SELECT id FROM companies WHERE domain = ?", (domain,)).fetchone()["id"]
+    console.print(json.dumps({"decision_id": decide_target(conn, tid, cid, decision, by, "cli", reason, note)}))
+
+
+@targets_app.command("show")
+def targets_show(thesis: str, limit: int = 60) -> None:
+    from vertex.workflows.targets import target_table
+    conn = _conn()
+    tid = conn.execute("SELECT id FROM theses WHERE slug = ?", (thesis,)).fetchone()["id"]
+    t = Table(title="accepted targets")
+    for c in ("company", "domain", "vertical", "st", "emp", "own", "score", "tier", "conf", "cov", "prov", "stage", "contact", "hooks", "msgs"):
+        t.add_column(c)
+    for r in target_table(conn, tid, limit):
+        t.add_row(r["name"][:26], r["domain"], (r["vertical"] or "")[:12], r["hq_state"] or "", str(r["employee_count"] or ""), f"{r['ownership_type'] or ''}/{r['ownership_confidence'] or ''}",
+                  f"{r['vertex_score']:.0f}" if r["vertex_score"] is not None else "", r["tier"] or "", f"{r['vertex_conf']:.2f}" if r["vertex_conf"] is not None else "",
+                  f"{r['coverage_pct']:.0f}" if r["coverage_pct"] is not None else "", "y" if r["provisional"] else "", r["stage"], "y" if r["has_primary"] else "", str(r["hooks"]), str(r["msgs"]))
+    console.print(t)

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertex Review {{ date }}</title>
+<style>
+:root{--bg:#f6f5f2;--card:#ffffff;--ink:#1c1c1a;--muted:#6b6a66;--line:#e3e1dc;--accent:#1f5f8b;--ok:#2e7d4f;--warn:#b26a00;--bad:#b3261e;--hold:#7a5c00;--chip:#eef0f3;--bar:#d9d7d1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--muted:#a3a19b;--line:#2f2f2c;--accent:#7fb3d8;--ok:#7ed3a0;--warn:#f0b35c;--bad:#f28b82;--hold:#e0c060;--chip:#2a2a27;--bar:#3a3a36}}
+:root[data-theme="dark"]{--bg:#141413;--card:#1e1e1c;--ink:#ecebe6;--muted:#a3a19b;--line:#2f2f2c;--accent:#7fb3d8;--ok:#7ed3a0;--warn:#f0b35c;--bad:#f28b82;--hold:#e0c060;--chip:#2a2a27;--bar:#3a3a36}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 16px 80px}
+header{position:sticky;top:0;background:var(--bg);padding:12px 0;border-bottom:1px solid var(--line);z-index:5}
+h1{font-size:18px;margin:0 0 6px}h2{font-size:16px;margin:28px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.strip{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:13px}
+.strip b{color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+.card.decided-approve{border-color:var(--ok)}.card.decided-reject{border-color:var(--bad)}.card.decided-hold{border-color:var(--hold)}.card.decided-edit{border-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline}
+.id{font-weight:700;color:var(--accent);font-family:ui-monospace,Menlo,monospace}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:1px 8px;font-size:12px;color:var(--muted);margin-right:4px}
+.chip.ok{color:var(--ok)}.chip.warn{color:var(--warn)}.chip.bad{color:var(--bad)}
+.bar{height:8px;background:var(--bar);border-radius:4px;overflow:hidden;width:140px;display:inline-block;vertical-align:middle}
+.bar i{display:block;height:100%;background:var(--accent)}
+.muted{color:var(--muted);font-size:13px}
+blockquote{margin:6px 0;padding:4px 10px;border-left:3px solid var(--line);color:var(--muted);font-size:13px}
+textarea{width:100%;min-height:90px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit;resize:vertical}
+textarea[readonly]{border-color:transparent;background:var(--chip)}
+details{margin:6px 0}summary{cursor:pointer;color:var(--muted);font-size:13px}
+.actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer;font:inherit;font-size:13px}
+button.on{outline:2px solid var(--accent)}
+select,input[type=text]{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px;font:inherit;font-size:13px;max-width:100%}
+.footer{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#out{width:100%;min-height:70px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{padding:6px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.step{margin:8px 0}.step .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.flags{font-size:12px;color:var(--warn)}
+.evd{font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>Vertex review · {{ date }} · {{ thesis }}</h1>
+<div class="strip">
+<span>Credits today: <b>{{ hdr.credits }}</b></span><span>Claude spend: <b>${{ '%.2f' % hdr.llm_usd }}</b></span>
+<span>Mailbox headroom: <b>{{ hdr.headroom }}/day</b></span><span>Campaigns: <b>{{ hdr.campaigns }}</b></span>
+<span>Universe: <b>{{ hdr.funnel }}</b></span><span>Suppression: <b>{{ hdr.suppression }}</b></span>
+</div>
+</header>
+
+<h2>A · Replies needing you ({{ replies|length }})</h2>
+{% if not replies %}<p class="muted">No replies waiting. Nothing has been sent yet.</p>{% endif %}
+{% for r in replies %}
+<div class="card" data-id="{{ r.short_id }}" data-kind="reply_action">
+<div class="row"><span class="id">{{ r.short_id }}</span><b>{{ r.contact }}</b><span class="muted">{{ r.company }} · {{ r.channel }} · {{ r.received_at }}</span>
+<span class="chip">{{ r.predicted_class }} {{ '%.0f' % (100*(r.predicted_confidence or 0)) }}%</span></div>
+<blockquote>{{ r.text }}</blockquote>
+<div class="step"><div class="k">Drafted answer (you send it from Lemlist)</div><textarea data-field="reply_draft" readonly>{{ r.suggested_reply or '' }}</textarea></div>
+<div class="actions">
+<button data-d="approve">Class is right</button>
+<select data-field="class"><option value="">Reclassify…</option>{% for c in classes %}<option>{{ c }}</option>{% endfor %}</select>
+<button data-d="snooze">Snooze 7d</button><button data-d="edit">Edit draft</button>
+</div></div>
+{% endfor %}
+
+<h2>B · Ready to enroll ({{ cards|length }}{% if cards_more %} of {{ cards_more }}{% endif %})</h2>
+<p class="muted">Approve = every step approved for this contact; Edit = edits are saved verbatim and approved; Hold = keep for later; Reject = never contact (give a reason). Nothing is pushed to Lemlist until you approve, and nothing is sent until you launch.</p>
+{% for c in cards %}
+<div class="card" data-id="{{ c.short_id }}" data-kind="enroll">
+<div class="row"><span class="id">{{ c.short_id }}</span><b>{{ c.company }}</b><span class="muted">{{ c.domain }} · {{ c.vertical }} · {{ c.hq }} · {{ c.employees or '?' }} emp</span>
+<span class="chip {{ 'ok' if c.ownership_confidence == 'high' else ('warn' if c.ownership_confidence == 'med' else 'bad') }}">{{ c.ownership or 'ownership ?' }} ({{ c.ownership_confidence or 'low' }})</span>
+<span class="chip">{{ c.tier }}{% if c.provisional %} provisional{% endif %}</span>
+<span>Score <b>{{ c.score }}</b> <span class="bar"><i style="width:{{ c.score }}%"></i></span> <span class="muted">band {{ c.band_lo }}–{{ c.band_hi }} · coverage {{ c.coverage }}% · A {{ c.attr }} / T {{ c.trans }}</span></span></div>
+{% if c.missing %}<div class="muted">Missing: {{ c.missing }}</div>{% endif %}
+<div class="evd">{% for e in c.evidence %}<blockquote>[{{ e.type }}] {{ e.text }}{% if e.quote %} — <i>“{{ e.quote }}”</i>{% endif %}{% if e.summary_only %} <span class="chip warn">from search summary</span>{% endif %}</blockquote>{% endfor %}</div>
+<div class="row"><b>{{ c.contact.name }}</b><span class="muted">{{ c.contact.title }} · rank {{ c.contact.rank }} · {{ c.contact.email or 'no email' }} ({{ c.contact.email_status or '-' }}) · conf {{ c.contact.confidence }}{% if c.contact.linkedin %} · <a href="{{ c.contact.linkedin }}">LinkedIn</a>{% endif %}</span>
+{% if c.alternates %}<select data-field="swap_contact"><option value="">Swap contact…</option>{% for a in c.alternates %}<option value="{{ a.id }}">{{ a.name }} · {{ a.title }} (rank {{ a.rank }})</option>{% endfor %}</select>{% endif %}</div>
+<div class="muted">Hook [{{ c.hook_type }}] {{ c.hook }} · variant {{ c.variant }} · critic {{ c.critic }}{% if c.flags %} · <span class="flags">lint: {{ c.flags }}</span>{% endif %}</div>
+{% for s in c.steps %}
+<div class="step"><div class="k">{{ s.label }}{% if s.subject is not none %} · subject: <input type="text" data-step="{{ s.key }}" data-part="subject" value="{{ s.subject }}" readonly>{% endif %}</div>
+{% if s.collapsed %}<details><summary>show</summary><textarea data-step="{{ s.key }}" data-part="body" readonly>{{ s.body }}</textarea></details>{% else %}<textarea data-step="{{ s.key }}" data-part="body" readonly>{{ s.body }}</textarea>{% endif %}</div>
+{% endfor %}
+<div class="actions"><button data-d="approve">Approve</button><button data-d="edit">Edit copy</button><button data-d="hold">Hold</button><button data-d="reject">Reject</button>
+<select data-field="reason"><option value="">reason…</option>{% for r in reasons %}<option>{{ r }}</option>{% endfor %}</select></div>
+</div>
+{% endfor %}
+{% if cards %}<button id="approve-clean">Approve all cards with no lint flags</button>{% endif %}
+
+<h2>C · Targets to accept ({{ targets|length }})</h2>
+<p class="muted">Engine-proposed targets. Pass = never worked for this thesis (give a reason). Accepted targets get enrichment and contact discovery.</p>
+{% if targets %}
+<table><tr><th>id</th><th>company</th><th>vertical</th><th>score</th><th>ownership</th><th>size</th><th>why it matched</th><th>decision</th></tr>
+{% for t in targets %}
+<tr data-id="{{ t.short_id }}" data-kind="accept_target"><td class="id">{{ t.short_id }}</td><td><b>{{ t.company }}</b><br><span class="muted">{{ t.domain }} · {{ t.hq }}{% if t.pre_accepted %} · <span class="chip">pre-accepted</span>{% endif %}{% if t.cohort == 'exploration' %} · <span class="chip">exploration</span>{% endif %}</span></td>
+<td>{{ t.vertical }}</td><td>{{ t.score }} {{ t.tier }}{% if t.provisional %}<br><span class="muted">provisional</span>{% endif %}<br><span class="muted">conf {{ t.confidence }} · cov {{ t.coverage }}%</span></td>
+<td>{{ t.ownership or '?' }} ({{ t.ownership_confidence or 'low' }}){% if t.ownership_evidence %}<br><span class="muted">“{{ t.ownership_evidence }}”</span>{% endif %}</td>
+<td>{{ t.employees or '?' }} emp</td><td class="muted">{{ t.fit_reason or '' }}</td>
+<td><div class="actions"><button data-d="approve">Accept</button><button data-d="reject">Pass</button><button data-d="hold">Research</button><select data-field="reason"><option value="">reason…</option>{% for r in reasons %}<option>{{ r }}</option>{% endfor %}</select></div></td></tr>
+{% endfor %}</table>{% else %}<p class="muted">No targets waiting.</p>{% endif %}
+
+<h2>D · Exceptions and proposals ({{ exceptions|length }})</h2>
+{% for x in exceptions %}
+<div class="card" data-id="{{ x.short_id }}" data-kind="{{ x.item_type }}"><div class="row"><span class="id">{{ x.short_id }}</span><b>{{ x.title }}</b><span class="muted">{{ x.company or '' }}</span></div>
+<div class="muted">{{ x.detail }}</div>
+<div class="actions"><button data-d="approve">Acknowledge / approve</button><button data-d="reject">Reject</button><button data-d="hold">Later</button></div></div>
+{% endfor %}
+{% if not exceptions %}<p class="muted">None.</p>{% endif %}
+
+<div class="footer"><button id="copy">Copy decisions</button><button id="theme">Theme</button><span class="muted" id="count">0 decisions</span><textarea id="out" readonly placeholder="Decisions JSON appears here. Paste it back to Claude or save it as data/review/decisions/{{ date }}.json"></textarea></div>
+<script>
+(function(){
+const dec = {};
+const date = {{ date|tojson }};
+function collect(card){
+  const id = card.dataset.id, d = dec[id] || {id: id};
+  const reason = card.querySelector('select[data-field=reason]'); if (reason && reason.value) d.reason = reason.value;
+  const cls = card.querySelector('select[data-field=class]'); if (cls && cls.value) d.class = cls.value;
+  const swap = card.querySelector('select[data-field=swap_contact]'); if (swap && swap.value) d.contact_id = Number(swap.value);
+  const edits = {};
+  card.querySelectorAll('[data-step]').forEach(el => { if (el.dataset.orig !== undefined && el.value !== el.dataset.orig) edits[el.dataset.step + ':' + el.dataset.part] = el.value; });
+  const draft = card.querySelector('textarea[data-field=reply_draft]'); if (draft && draft.dataset.orig !== undefined && draft.value !== draft.dataset.orig) edits['reply_draft'] = draft.value;
+  if (Object.keys(edits).length) d.edits = edits;
+  return d;
+}
+function render(){
+  const list = Object.values(dec).filter(d => d.decision);
+  document.getElementById('count').textContent = list.length + ' decisions';
+  document.getElementById('out').value = JSON.stringify({date: date, decisions: list}, null, 1);
+  try { localStorage.setItem('vx-review-' + date, JSON.stringify(dec)); } catch (e) {}
+}
+document.querySelectorAll('[data-id]').forEach(card => {
+  card.querySelectorAll('[data-step], textarea[data-field=reply_draft]').forEach(el => { el.dataset.orig = el.value; });
+  card.querySelectorAll('button[data-d]').forEach(btn => btn.addEventListener('click', () => {
+    const id = card.dataset.id; const d = collect(card); d.decision = btn.dataset.d; d.kind = card.dataset.kind; dec[id] = d;
+    card.querySelectorAll('button[data-d]').forEach(b => b.classList.toggle('on', b === btn));
+    card.className = card.className.replace(/decided-\w+/g, '').trim() + ' decided-' + btn.dataset.d;
+    if (btn.dataset.d === 'edit') card.querySelectorAll('[data-step], textarea[data-field=reply_draft]').forEach(el => { el.removeAttribute('readonly'); const det = el.closest('details'); if (det) det.open = true; });
+    render();
+  }));
+  card.querySelectorAll('select, textarea, input').forEach(el => el.addEventListener('input', () => { if (dec[card.dataset.id]) { const keep = dec[card.dataset.id].decision; dec[card.dataset.id] = collect(card); dec[card.dataset.id].decision = keep; dec[card.dataset.id].kind = card.dataset.kind; render(); } }));
+});
+const clean = document.getElementById('approve-clean');
+if (clean) clean.addEventListener('click', () => { document.querySelectorAll('.card[data-kind=enroll]').forEach(card => { if (!card.querySelector('.flags')) { const b = card.querySelector('button[data-d=approve]'); if (b && !dec[card.dataset.id]) b.click(); } }); });
+document.getElementById('copy').addEventListener('click', () => { render(); const t = document.getElementById('out'); t.select(); try { navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } });
+document.getElementById('theme').addEventListener('click', () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark'; });
+try { const saved = JSON.parse(localStorage.getItem('vx-review-' + date) || '{}'); Object.keys(saved).forEach(id => { const card = document.querySelector('[data-id="' + id + '"]'); if (card && saved[id].decision) { const b = card.querySelector('button[data-d=' + saved[id].decision + ']'); if (b) b.click(); } }); } catch (e) {}
+render();
+})();
+</script>
+</body>
+</html>
