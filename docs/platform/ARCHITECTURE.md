@@ -556,3 +556,36 @@ The master prompt for building the MVP is in [CLAUDE_CODE_HANDOFF.md](./CLAUDE_C
 2. GitHub: move the sites organisation to the Team plan so rulesets apply to private repos; confirm the GitHub App has `administration: write` (needed for `generate` from template) in addition to `contents` and `pull_requests`.
 3. Anthropic: Managed Agents is beta and enabled for all API accounts; confirm the org's data-retention setting permits it (not ZDR) before Phase 6.
 4. Supabase: Pro plan ($25/org) from day one so projects never pause and custom SMTP is available.
+
+---
+
+## 15. Zero-touch variant (owner request, 2026-10-04: "I don't want to do anything; use the existing accounts")
+
+**Constraint found:** this cloud container cannot reach `api.netlify.com` or `supabase.com`, and holds no Netlify, Supabase, Resend or Anthropic credentials. Only GitHub (scoped to TET) and the Anthropic API host are reachable. The session that built La Soirée ran on the owner's Windows computer (Claude Desktop, device "asean"), which is presumably already logged into Netlify and GitHub **[verify from that session]**.
+
+**Decision:** keep the architecture and every interface, but replace the parts that need new accounts with what already exists. No new vendor accounts, no new Netlify team, no GitHub App registration.
+
+| Concern | Zero-touch MVP | Why it is acceptable | Swap-back trigger |
+|---|---|---|---|
+| Database + job state | Netlify's built-in storage (Blobs; Netlify DB if the plan offers it **[verify]**) behind a `Store` interface | A handful of pilot tenants; no new account | 2nd paying customer or any need for SQL reporting → Supabase Postgres |
+| Tenant isolation | Enforced in code: every query is keyed by `org_id` taken from the session, never from the request; isolation tests replace RLS tests | Weaker than RLS; mitigated by tests and by having 1–3 tenants | Swap to Supabase RLS at the trigger above |
+| Customer login | Netlify Identity (reinstated Feb 2026) email invites **[verify on the account's plan]** | No Resend or Supabase Auth needed | Magic links via Supabase at the swap |
+| Assets | Netlify Blobs + Netlify Image CDN allowlist (store behind `AssetStore`) | Same delivery path as the standard | Supabase Storage at the swap |
+| AI access | Netlify AI Gateway (injects Anthropic credentials into Functions, billed in Netlify credits at 180 credits per $1) **[verify it exposes `claude-opus-5-5` with strict tools and caching]**; otherwise one Anthropic key | No new key if the Gateway works | — |
+| Preview/publish/undo | **Git-driven, no runtime Netlify token:** platform commits to `draft/<id>` and opens a PR; Netlify's existing Git link builds the Deploy Preview; preview URL is read from the PR's Netlify status; approve = merge PR; undo = revert commit on `main` (about 1 minute rebuild) instead of Netlify restore | Removes the need for a Netlify API token at runtime | Add Netlify restore for instant undo once a token exists |
+| Repo write credential | The GitHub login already on the desktop session, set once as a Netlify env var by the desktop session | Broader than a one-repo App token (flagged risk) | Register the GitHub App (owner click-through) before the 2nd customer |
+| Netlify site creation for new customers | Done by the desktop session via the Netlify CLI at onboarding, not by the platform at runtime | Onboarding volume is tiny | Move into `provision-site` once a PAT exists |
+
+**Who does what:**
+- **This cloud session (no human):** writes and tests everything that does not need live Netlify: `site-kit`, the template, `platform-core` with in-memory fakes, the portal, schemas, tests, docs. Pushes to the new `avue57-ai/site-manager` repo if the GitHub tools allow creating it; otherwise to a `platform/` folder on the TET branch.
+- **The existing desktop session (no new login):** receives a written runbook through `send_message` and executes the live steps: create the portal's Netlify project, set env vars, run the La Soirée migration to a Deploy Preview, create the staging copy, smoke-test the §5 flow. This needs the owner's computer on with Claude Desktop open at some point; nothing to click.
+
+**What genuinely still needs the owner (cannot be removed):** the La Soirée DNS cutover and approving the merge of the migration PR. Both are on the live customer site and stay human-approved by design. Everything else is delegated.
+
+**Plan changes to the earlier sections:** §6 and the handoff prompt gain this variant as the default for the MVP; Supabase, Resend and the GitHub App move to "swap-in at trigger". The interfaces (`Store`, `AssetStore`, `RepoClient`, `DeployClient`, `Mailer`, `CodeAgentRunner`) make the swap a config change, not a rewrite.
+
+**Next actions after approval, in order:**
+1. Update `docs/platform/ARCHITECTURE.md` and `CLAUDE_CODE_HANDOFF.md` in TET with this section; commit and push.
+2. Try to create `avue57-ai/site-manager` with the GitHub tools; fall back to a `platform/` folder in TET.
+3. Build Phases 0–1 and the offline halves of 2–5 here, with tests.
+4. Write the desktop runbook and send it to the La Soirée session; report back what it confirms or cannot do.

@@ -60,3 +60,14 @@ You are the lead engineer building **Site Manager**, a multi-tenant SaaS that le
 ### 5. Reporting
 End each phase with a short written status in `docs/STATUS.md`: what was built, test output summary (counts and the command to reproduce), measured numbers (eval pass rate, median AI cost per edit from `ai_runs`, preview build time), what was deferred and why, and the exact owner actions needed next. Keep it under one page per phase.
 
+
+---
+
+### 6. MVP variant that overrides the stack above: zero new accounts
+
+Read `docs/platform/ARCHITECTURE.md` section 15 before Phase 0. Where it conflicts with sections 1 to 5 of this prompt, section 15 wins for the MVP. In short:
+
+- Do not assume Supabase, Resend, a GitHub App, a Netlify API token or a second Netlify team exist. Build against the interfaces (`Store`, `AssetStore`, `RepoClient`, `DeployClient`, `Mailer`, `CodeAgentRunner`) with Netlify-native and in-memory implementations first, so the swap to Supabase and a GitHub App is a configuration change.
+- Preview, publish and undo are Git-driven: commit to `draft/<id>`, open a PR, read the Deploy Preview URL from the PR's Netlify status, merge to publish, revert the commit to undo.
+- Enforce tenant isolation in code (`org_id` from the session only) and prove it with isolation tests.
+- Anything that needs live Netlify access is written as a runbook for the existing desktop session, not attempted from the cloud container, which cannot reach Netlify or Supabase.
