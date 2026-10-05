@@ -161,7 +161,7 @@ export function schemaForPath(path: string): z.ZodType | null {
 }
 export const EDITABLE_PREFIX = 'content/';
 
-function collectAssets(node: unknown, out: Set<string>) {
+export function collectAssets(node: unknown, out: Set<string>) {
   if (Array.isArray(node)) node.forEach((n) => collectAssets(n, out));
   else if (node && typeof node === 'object') {
     for (const [k, v] of Object.entries(node)) {

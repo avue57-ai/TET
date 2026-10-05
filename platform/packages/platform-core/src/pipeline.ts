@@ -1,3 +1,4 @@
+import { collectAssets } from '../../schemas/src/index';
 import { StructuredEditor, costUsd, type AssetInfo, type RunUsage } from './engine';
 import type { LlmClient, RepoClient, Store } from './ports';
 
@@ -6,7 +7,7 @@ export class RateLimitError extends Error {}
 export class ConflictError extends Error {}
 
 export type Session = { userId: string; orgId: string };
-export type Site = { id: string; orgId: string; name: string };
+export type Site = { id: string; orgId: string; name: string; repo?: { owner: string; repo: string; netlifySiteName: string } };
 export type AssetRecord = { id: string; siteId: string; w: number; h: number; description: string; suggestedAlt: string; deleted?: boolean };
 export type Status = 'received' | 'needs_clarification' | 'awaiting_operator' | 'failed' | 'previewing' | 'preview_ready' | 'published' | 'discarded';
 export type ChangedField = { file: string; pointer: string; before: unknown; after: unknown };
@@ -40,25 +41,53 @@ export class EditService {
   }
   private async openDraft(siteId: string) { return (await this.d.store.list<Draft>(`drafts:${siteId}`)).find((x) => x.status === 'open') ?? null; }
 
-  async submit(s: Session, siteId: string, text: string, assetIds: string[] = []): Promise<EditRequest> {
-    const site = await this.siteFor(s, siteId);
+  /** Fast path: validates and records the request. The AI work happens in process(), which can run in a background function. */
+  async enqueue(s: Session, siteId: string, text: string, assetIds: string[] = []): Promise<EditRequest> {
+    await this.siteFor(s, siteId);
+    if (!text.trim() || text.length > 4000) throw new ConflictError('request text must be 1 to 4000 characters');
     const all = await this.d.store.list<EditRequest>(`requests:${siteId}`);
     const dayAgo = this.now().getTime() - 86_400_000;
     if (all.filter((r) => new Date(r.createdAt).getTime() > dayAgo).length >= this.maxPerDay) throw new RateLimitError('daily edit limit reached');
-
+    if (all.some((r) => r.status === 'received' && new Date(r.createdAt).getTime() > this.now().getTime() - 600_000)) throw new ConflictError('another request is still being worked on');
     const assetRecs = (await this.d.store.list<AssetRecord>(`assets:${siteId}`)).filter((a) => !a.deleted);
     for (const id of assetIds) if (!assetRecs.some((a) => a.id === id)) throw new ForbiddenError(`unknown asset ${id}`);
-    const assets: AssetInfo[] = assetRecs.filter((a) => assetIds.includes(a.id)).map((a) => ({ id: a.id, description: a.description, w: a.w, h: a.h, suggestedAlt: a.suggestedAlt }));
-
-    let draft = await this.openDraft(siteId);
-    const req: EditRequest = { id: this.newId(), siteId, draftId: draft?.id ?? null, userId: s.userId, text, assetIds, status: 'received', createdAt: this.now().toISOString() };
+    const req: EditRequest = { id: this.newId(), siteId, draftId: null, userId: s.userId, text, assetIds, status: 'received', createdAt: this.now().toISOString() };
     await this.d.store.put(`requests:${siteId}`, req.id, req);
     await this.audit(s, siteId, 'edit_request.received', req.id);
+    return req;
+  }
 
+  async submit(s: Session, siteId: string, text: string, assetIds: string[] = []): Promise<EditRequest> {
+    const req = await this.enqueue(s, siteId, text, assetIds);
+    return this.process(s, siteId, req.id);
+  }
+
+  async process(s: Session, siteId: string, requestId: string): Promise<EditRequest> {
+    const site = await this.siteFor(s, siteId);
+    const req = await this.d.store.get<EditRequest>(`requests:${siteId}`, requestId);
+    if (!req) throw new ForbiddenError('request not found');
+    if (req.status !== 'received') return req; // idempotent: a retried background call does nothing
+    try {
+      return await this.run(s, site, req);
+    } catch (e) {
+      return this.setStatus(s, req, 'failed', { error: (e as Error).message });
+    }
+  }
+
+  private async run(s: Session, site: Site, req: EditRequest): Promise<EditRequest> {
+    const siteId = site.id;
+    const all = await this.d.store.list<EditRequest>(`requests:${siteId}`);
+    const assetRecs = (await this.d.store.list<AssetRecord>(`assets:${siteId}`)).filter((a) => !a.deleted);
+    const assets: AssetInfo[] = assetRecs.filter((a) => req.assetIds.includes(a.id)).map((a) => ({ id: a.id, description: a.description, w: a.w, h: a.h, suggestedAlt: a.suggestedAlt }));
+    let draft = await this.openDraft(siteId);
+    req.draftId = draft?.id ?? null;
     const files = await this.d.repo.getFiles(site.id, draft?.branch ?? 'main');
-    const recent = all.filter((r) => r.draftId && r.draftId === draft?.id).map((r) => `Owner: ${r.text}`);
+    const recent = all.filter((r) => r.draftId && r.draftId === draft?.id && r.id !== req.id).map((r) => `Owner: ${r.text}`);
     const editor = new StructuredEditor(this.d.llm, (u) => this.logUsage(siteId, req.id, u));
-    const out = await editor.run({ files, assets, text, knownAssets: new Set(assetRecs.map((a) => a.id)), recentTurns: recent });
+    // Assets this site already references stay valid so an old gap never blocks an unrelated edit; new references must belong to the site.
+    const known = new Set(assetRecs.map((a) => a.id));
+    collectAssets(files, known);
+    const out = await editor.run({ files, assets, text: req.text, knownAssets: known, recentTurns: recent });
 
     if (out.kind === 'ask') return this.setStatus(s, req, 'needs_clarification', { question: out.question });
     if (out.kind === 'escalate') return this.setStatus(s, req, 'awaiting_operator', { error: `${out.category}: ${out.reason}` });
@@ -72,7 +101,7 @@ export class EditService {
       req.draftId = id;
     }
     await this.d.repo.commit(site.id, draft.branch, out.summary, out.changedPaths.map((p) => ({ path: p, content: out.files[p] ?? null })));
-    if (draft.prNumber === null) draft.prNumber = (await this.d.repo.openPr(site.id, draft.branch, out.summary, `Owner request: ${text}`)).number;
+    if (draft.prNumber === null) draft.prNumber = (await this.d.repo.openPr(site.id, draft.branch, out.summary, `Owner request: ${req.text}`)).number;
     await this.d.store.put(`drafts:${siteId}`, draft.id, draft);
     const changedFields = out.diff.flatMap((d) => d.fields.map((f) => ({ file: d.path, ...f })));
     return this.setStatus(s, req, 'previewing', { summary: out.summary, changedFields });
@@ -132,6 +161,18 @@ export class EditService {
     await this.d.store.put(`revisions:${siteId}`, rev.id, rev);
     await this.audit(s, siteId, 'revision.undone', last.id);
     return rev;
+  }
+
+  /** Everything the portal screen needs in one call. Also advances previews that have become ready. */
+  async state(s: Session, siteId: string) {
+    const site = await this.siteFor(s, siteId);
+    let requests = (await this.d.store.list<EditRequest>(`requests:${siteId}`)).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 20);
+    for (const r of requests) if (r.status === 'previewing') await this.refreshPreview(s, siteId, r.id);
+    requests = (await this.d.store.list<EditRequest>(`requests:${siteId}`)).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 20);
+    const draft = await this.openDraft(siteId);
+    const revisions = (await this.d.store.list<Revision>(`revisions:${siteId}`)).sort((a, b) => b.number - a.number).slice(0, 10);
+    const production = await this.d.store.get<{ url: string }>('siteurls', siteId);
+    return { site: { id: site.id, name: site.name, url: production?.url ?? null }, draft, requests, revisions };
   }
 
   async history(s: Session, siteId: string): Promise<Revision[]> {
