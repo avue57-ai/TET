@@ -41,7 +41,7 @@ describe('validateSite', () => {
   });
   it('enforces WCAG AA contrast in the theme', () => {
     const s = sampleSite() as any;
-    s['content/settings/theme.json'].colors.text = '#e8e0d0';
+    s['content/settings/theme.json'].colors.ink = '#e8e0d0';
     expect(validateSite(s).issues.some((i) => /contrast/.test(i.message))).toBe(true);
     expect(contrastRatio('#000000', '#ffffff')).toBeCloseTo(21, 0);
   });

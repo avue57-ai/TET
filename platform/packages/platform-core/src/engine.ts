@@ -45,7 +45,22 @@ export class StructuredEditor {
       for (const call of calls) {
         if (call.name === 'ask_customer') return { kind: 'ask', question: String(call.input?.question ?? '') };
         if (call.name === 'escalate') return { kind: 'escalate', reason: String(call.input?.reason ?? ''), category: String(call.input?.category ?? 'other') };
-        if (call.name === 'read_content') {
+        if (call.name === 'search_content') {
+          const q = String(call.input?.text ?? '').toLowerCase().trim();
+          if (q.length < 2) { results.push({ type: 'tool_result', tool_use_id: call.id, content: 'search text must be at least 2 characters', is_error: true }); continue; }
+          const hits: string[] = [];
+          const stripped = q.replace(/[$,\s]/g, '');
+          const num = /^\d+(\.\d+)?$/.test(stripped) ? stripped : null; // "$125" also finds the number 125 in settings files
+          const walk = (node: unknown, path: string, ptr: string) => {
+            if (hits.length >= 25) return;
+            if (typeof node === 'number') { if (num !== null && String(node) === num) hits.push(`${path}#${ptr || '/'}: ${node} (number)`); }
+            else if (typeof node === 'string') { if (node.toLowerCase().includes(q)) hits.push(`${path}#${ptr || '/'}: ${node.length > 100 ? node.slice(0, 97) + '...' : node}`); }
+            else if (Array.isArray(node)) node.forEach((n, i) => walk(n, path, `${ptr}/${i}`));
+            else if (node && typeof node === 'object') for (const [k, v] of Object.entries(node)) walk(v, path, `${ptr}/${k}`);
+          };
+          for (const [path, doc] of Object.entries(input.files)) if (path.startsWith('content/')) walk(doc, path, '');
+          results.push({ type: 'tool_result', tool_use_id: call.id, content: hits.length ? hits.join('\n') : 'no matches' });
+        } else if (call.name === 'read_content') {
           const p = String(call.input?.path ?? '');
           const doc = p.startsWith('content/') && !p.includes('..') ? input.files[p] : undefined;
           results.push({ type: 'tool_result', tool_use_id: call.id, content: doc === undefined ? `no such file: ${p}` : JSON.stringify(doc), is_error: doc === undefined });

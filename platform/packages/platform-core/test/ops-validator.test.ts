@@ -11,10 +11,21 @@ describe('applyOps', () => {
     expect(doc).toEqual({ a: { b: [1, 2, 3] }, c: 'x' });
   });
   it('throws on missing paths, bad indexes, root patches and prototype keys', () => {
-    expect(() => applyOps({}, [{ op: 'replace', path: '/nope', value: 1 }])).toThrow(PatchError);
+    expect(() => applyOps({}, [{ op: 'replace', path: '/no/parent', value: 1 }])).toThrow(PatchError);
+    expect(applyOps({ a: 1 } as any, [{ op: 'replace', path: '/b', value: 2 }])).toEqual({ a: 1, b: 2 }); // replace sets a missing key
+    expect(() => applyOps({}, [{ op: 'remove', path: '/nope' }])).toThrow(PatchError);
     expect(() => applyOps({ a: [1] }, [{ op: 'replace', path: '/a/5', value: 1 }])).toThrow(PatchError);
     expect(() => applyOps({}, [{ op: 'add', path: '', value: 1 }])).toThrow(PatchError);
     expect(() => applyOps({}, [{ op: 'add', path: '/__proto__', value: 1 }])).toThrow(PatchError);
+  });
+});
+
+describe('move', () => {
+  it('moves array items and object values, evaluating the target after removal', () => {
+    expect(applyOps({ l: ['a', 'b', 'c', 'd'] }, [{ op: 'move', from: '/l/3', path: '/l/1' }])).toEqual({ l: ['a', 'd', 'b', 'c'] });
+    expect(applyOps({ x: 1, y: {} } as any, [{ op: 'move', from: '/x', path: '/y/z' }])).toEqual({ y: { z: 1 } });
+    expect(() => applyOps({ l: [1] }, [{ op: 'move', from: '/l/9', path: '/l/0' }])).toThrow(PatchError);
+    expect(() => applyOps({ l: [1] }, [{ op: 'move', path: '/l/0' }])).toThrow(PatchError);
   });
 });
 

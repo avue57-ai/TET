@@ -13,9 +13,9 @@ export function sampleSite(): SiteFiles {
       header: { left: [{ label: 'Collection', href: '/collection/' }], right: [{ label: 'About', href: '/about/' }], cta: { label: 'Book', href: '/book/' } },
       footer: { tagline: 'A private salon for European gowns.', columns: [{ title: 'Explore', links: [{ label: 'Collection', href: '/collection/' }] }], legal: [{ label: 'Privacy', href: '/about/' }], bottomLine: '© La Soirée Bridal' },
     },
+    'content/settings/site.json': { standard: '1.0', sections: ['hero', 'statement', 'testimonials', 'rich-text', 'pricing-table', 'cta-banner', 'hours-location', 'faq', 'gallery', 'feature-grid'], assets: { siteId: 'la-soiree', base: 'https://portal.example' } },
     'content/settings/theme.json': {
-      colors: { background: '#f7f3ec', text: '#1d1916', muted: '#6b5f52', accent: '#7a5c2e', accentText: '#ffffff' },
-      fonts: { serif: 'Bodoni Moda', sans: 'Jost' }, headerStyle: 'transparent',
+      colors: { ivory: '#f7f3ec', cream: '#efe8dd', sand: '#e4d9c8', champagne: '#cdb894', stone: '#b3a58f', muted: '#6b5f52', ink: '#1d1916', charcoal: '#27221e', brass: '#a4835a', brassText: '#7a5e3a' },
     },
     'content/pages/home.json': {
       title: 'Home', path: '/', header: 'transparent',

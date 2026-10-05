@@ -1,4 +1,4 @@
-export type Op = { op: 'add' | 'replace' | 'remove'; path: string; value?: unknown };
+export type Op = { op: 'add' | 'replace' | 'remove' | 'move'; path: string; value?: unknown; from?: string };
 export class PatchError extends Error {}
 
 function parse(pointer: string): string[] {
@@ -10,7 +10,15 @@ function parse(pointer: string): string[] {
 /** Applies a JSON-patch subset (add, replace, remove) to a deep copy of doc. */
 export function applyOps<T>(doc: T, ops: Op[]): T {
   let root: any = structuredClone(doc);
-  for (const op of ops) {
+  for (const op0 of ops) {
+    let op = op0;
+    if (op0.op === 'move') {
+      if (typeof op0.from !== 'string') throw new PatchError('move needs a from path');
+      let cur: any = root;
+      for (const k of parse(op0.from)) { if (cur == null || typeof cur !== 'object' || !(k in cur)) throw new PatchError(`path not found: ${op0.from}`); cur = cur[k]; }
+      root = applyOps(root, [{ op: 'remove', path: op0.from }]);
+      op = { op: 'add', path: op0.path, value: structuredClone(cur) };
+    }
     const keys = parse(op.path);
     if (keys.length === 0) throw new PatchError('cannot patch the document root; use create');
     let parent = root;
@@ -29,8 +37,8 @@ export function applyOps<T>(doc: T, ops: Op[]): T {
     } else if (parent && typeof parent === 'object') {
       if (last === '__proto__' || last === 'constructor' || last === 'prototype') throw new PatchError(`forbidden key in ${op.path}`);
       if (op.op === 'add') parent[last] = op.value;
+      else if (op.op === 'replace') parent[last] = op.value; // replacing a key that is not there yet simply sets it
       else if (!(last in parent)) throw new PatchError(`path not found: ${op.path}`);
-      else if (op.op === 'replace') parent[last] = op.value;
       else delete parent[last];
     } else throw new PatchError(`path not found: ${op.path}`);
   }
