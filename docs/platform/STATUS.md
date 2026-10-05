@@ -1,6 +1,8 @@
 # Build status (2026-10-05)
 
-**Live attempt, 2026-10-05:** the session on the owner's computer ran the tests (88 passed), confirmed the draft pull request's Deploy Preview built and the live site is up, then stopped: it has a signed-in browser but no `netlify` or `gh` tools, and it may not type secrets. The runbook now has a browser-only path (Path B). The portal needs one master secret (`SM_SECRET`) plus a GitHub token, both pasted by a human, and has a setup page at `/setup.html` where the human types the password. 89 tests pass.
+**Update (setup without typed secrets):** the portal now creates its own GitHub app (one-repository, short-lived tokens, via GitHub's confirm-and-install screens) and signs the operator in with a code printed in the Netlify function log. No environment variables, command-line tools or pasted tokens are needed. 105 tests pass, and the full setup flow passes 16 checks in a real browser with GitHub simulated. See `DESKTOP_RUNBOOK.md`.
+
+**Live attempt, 2026-10-05:** the session on the owner's computer ran the tests, confirmed the draft pull request's Deploy Preview built and the live site is up, then stopped: it has a signed-in browser but no command-line tools, and it may not type secrets. The setup was redesigned (see the update above) so it no longer needs any.
 
 ## Built and tested in the cloud session
 
@@ -15,13 +17,13 @@
 | Customer screen: preview plus chat, upload, approve, discard, undo | `apps/portal/public` | 18 checks in real Chromium on desktop and 390 px phone; found and fixed one layout bug |
 | La Soirée migrated to Site Standard v1 | `avue57-ai/la-soiree-bridal`, branch `standard-v1`, draft PR 1 | 117 built files identical to the previous build (apart from one theme style tag and 289 bytes of new CSS); site checks pass; bad edits fail the build |
 
-89 tests in 9 files. Typecheck clean.
+105 tests in 10 files. Typecheck clean.
 
 ## Not done, and why
 
 | Item | Why | Next step |
 |---|---|---|
-| Live portal on Netlify | The cloud session cannot reach Netlify or hold its credentials; the desktop session cannot enter secrets | `DESKTOP_RUNBOOK.md`, Path B |
+| Live portal on Netlify | The cloud session cannot reach Netlify; the desktop session cannot enter secrets | `DESKTOP_RUNBOOK.md` (browser only, no secrets typed) |
 | Real-model behaviour | No Anthropic key in the cloud session, so the editor loop has only run against a scripted model | Runbook step 4 (`diag?probe=ai`) and step 8; then build an eval set from real runs |
 | Netlify preview detection | Depends on the exact commit-status name Netlify posts; unverified | Runbook step 7 |
 | Admin console screens | Operators use the admin API and diagnostics for now | Build after the pilot shows what operators need |
