@@ -79,6 +79,25 @@ describe('portal runtime', () => {
     expect(JSON.stringify(body)).not.toContain(env.SESSION_SECRET);
   });
 
+  it('runs from a single master secret and uses it as the operator password', async () => {
+    const store = new InMemoryStore(), repo = new InMemoryRepo(); repo.seed('la-soiree', sampleSite());
+    const one = { SM_SECRET: 'm'.repeat(48), URL: 'https://portal.test' };
+    const calls: any[] = [];
+    const rt = createRuntime(one, { store, repo, llm: new ScriptedLlm([[tool('ask_customer', { question: 'q?' })]]), bytes: new InMemoryAssetBytes(), describer: { describe: async () => ({ description: 'd', alt: 'a' }) }, fetchBackground: async (u, i) => { calls.push({ u, i }); } });
+    const admin = (p: string, body: unknown) => rt.route(new Request(`https://portal.test/api/admin/${p}`, { method: 'POST', body: JSON.stringify(body), headers: { 'x-admin-secret': one.SM_SECRET } }));
+    expect((await rt.route(new Request('https://portal.test/api/admin/diag', { headers: { 'x-admin-secret': 'wrong'.repeat(10) } }))).status).toBe(401);
+    expect((await admin('sites', { id: 'la-soiree', orgId: 'o', name: 'n', repo: { owner: 'a', repo: 'b', netlifySiteName: 'c' } })).status).toBe(200);
+    const { invite } = (await (await admin('invites', { orgId: 'o', userId: 'u' })).json()) as any;
+    const login = await rt.route(new Request('https://portal.test/api/login', { method: 'POST', body: JSON.stringify({ invite: new URL(invite).searchParams.get('invite') }), headers: { 'x-sm-csrf': '1' } }));
+    expect(login.status).toBe(200);
+    // the derived internal key protects the background function, and the master secret itself is not that key
+    const cookie = /sm_session=([^;]+)/.exec(login.headers.get('set-cookie')!)![1]!;
+    await rt.route(new Request('https://portal.test/api/sites/la-soiree/requests', { method: 'POST', body: JSON.stringify({ text: 'hi' }), headers: { cookie: `sm_session=${cookie}`, 'x-sm-csrf': '1' } }));
+    expect(calls[0].i.headers['x-internal-secret']).not.toBe(one.SM_SECRET);
+    expect(calls[0].i.headers['x-internal-secret']).toMatch(/^[0-9a-f]{64}$/);
+    expect(() => createRuntime({ SM_SECRET: 'short' }, { store, repo, llm: new ScriptedLlm([]), bytes: new InMemoryAssetBytes(), describer: { describe: async () => ({ description: '', alt: '' }) } })).toThrow(/at least 32/);
+  });
+
   it('refuses to start without its secrets', () => {
     expect(() => createRuntime({ SESSION_SECRET: 'x'.repeat(40) }, { store: new InMemoryStore(), bytes: new InMemoryAssetBytes(), repo: new InMemoryRepo(), llm: new ScriptedLlm([]), describer: { describe: async () => ({ description: '', alt: '' }) } })).toThrow(/INTERNAL_SECRET/);
   });

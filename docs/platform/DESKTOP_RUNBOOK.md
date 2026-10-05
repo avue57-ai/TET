@@ -1,4 +1,78 @@
-# Runbook: put the assistant live (for the session that has the Netlify and GitHub logins)
+# Runbook: put the assistant live
+
+**Read "Path B" first.** The first attempt found the session has a signed-in browser (Netlify and GitHub) but no `netlify` or `gh` command-line tools, and it may not type secrets or tokens into any field. Path B is built for that. Path A is the original command-line version, kept for a computer where those tools are logged in.
+
+## Path B: browser only, two pasted values
+
+Who does what: the session in the owner's browser does every click and reads every page. The owner (a human at the keyboard) does exactly these four things, because they involve secrets or consent screens: (1) creates one GitHub token, (2) pastes two values into Netlify's environment-variable page, (3) approves any GitHub or Netlify permission screen that appears, (4) types the setup password into the portal's setup page. Everything else is automatic.
+
+### B1. Two empty private repositories (browser, no secrets)
+
+In the signed-in browser, create two **empty private** repositories under `avue57-ai` at github.com/new, with no README, no .gitignore, no licence:
+
+- `site-manager` (the portal)
+- `la-soiree-staging` (a private test copy of the migrated website)
+
+Then tell the cloud session (the one that wrote the platform) the two names are ready. It will attach both and push the code:
+- `site-manager` gets the contents of `platform/` as its root (so Netlify finds `netlify.toml` there).
+- `la-soiree-staging` gets the `standard-v1` branch of `la-soiree-bridal` as its `main`.
+
+### B2. Netlify: two sites from Git (browser)
+
+In Netlify (team already signed in), choose Add new project, then Import an existing project, then GitHub:
+- Import `site-manager`. Name it `la-soiree-portal` (add a suffix if taken). The build settings come from `netlify.toml`; change nothing. Do not deploy yet.
+- Import `la-soiree-staging`. Name it `la-soiree-staging`. Build settings come from its `netlify.toml`.
+Approve the GitHub permission screen so Netlify can see only these two repositories. Do not grant access to `TET`.
+
+### B3. The owner pastes two values (secrets)
+
+1. **Create a GitHub token.** github.com/settings/personal-access-tokens/new. Name: `site-manager`. Expiry: 90 days. Repository access: only `la-soiree-bridal` and `la-soiree-staging`. Permissions: Contents read and write, Pull requests read and write (Metadata read is automatic). Copy the token.
+2. **Pick a setup password**: any long random string of at least 32 characters (a password manager's generator is ideal). Save it somewhere safe. This is the only operator password.
+3. In Netlify, on the `la-soiree-portal` site, open Site configuration, Environment variables, and add:
+   - `SM_SECRET` = the setup password (mark as secret)
+   - `GITHUB_TOKEN` = the token (mark as secret)
+4. **AI access.** First try without an Anthropic key: Netlify may supply one through its AI Gateway on the current plan. If the setup check in B5 says the AI is not reachable, add `ANTHROPIC_API_KEY` (create one at console.anthropic.com, API keys) the same way. That is the only other value that can ever be needed.
+
+Never paste any of these into a chat.
+
+### B4. Deploy (browser)
+
+Trigger the deploy of `la-soiree-portal` and of `la-soiree-staging`. Wait for both to show Published. Note the portal address, called PORTAL below.
+
+### B5. Setup page (owner types the password)
+
+Open `PORTAL/setup.html`. Type the setup password into the page yourself. Then, in order:
+1. **Check setup** (leave the site id blank): the three secret flags should be true and `ai.ok` true.
+2. **Register a website** with these values: site id `la-soiree-staging`, customer id `staging`, name `La Soirée (staging)`, live address = the staging Netlify address, GitHub owner `avue57-ai`, repository `la-soiree-staging`, Netlify site name = the staging site's name. Click Register.
+3. **Check setup** with site id `la-soiree-staging`: `github.status` should be 200 and `canPush` true.
+4. **Create link** for customer id `staging`, person `tester`. The page shows a sign-in link (works once).
+
+### B6. Point the staging site at the portal, then test (session, browser)
+
+In the cloud session's push access to `la-soiree-staging`, the cloud session runs `node scripts/set-asset-base.mjs PORTAL` and pushes. (If the cloud session cannot, the browser session edits `content/settings/site.json` `assets.base` and the `netlify.toml` block as that script does, through GitHub's web editor.) Wait for the staging site to rebuild.
+
+Open the sign-in link and run these on the staging site, in order, noting pass or fail:
+1. "Change the main headline to Luxury Bridal, Personally Curated." A preview should appear within a few minutes showing the change. Approve and publish. The staging site updates. Undo. It reverts.
+2. The same with a photo: "Replace the first big photo with this one" and attach a photo.
+3. "Add a booking widget": should be answered as needing a designer's touch.
+4. "Change the photo": should ask one clarifying question.
+5. Send a second request while one is running: should be blocked politely.
+
+### B7. Confirm Netlify's preview status name
+
+Open the pull request the assistant created in `la-soiree-staging`. Note the exact name of Netlify's deploy-preview check or status. The portal expects a status named like `netlify/<site>/deploy-preview`. If it differs, tell the cloud session; it will change `packages/platform-core/src/github.ts`, run the tests, and push.
+
+### B8. Report
+
+Write what passed and failed, with exact error text and no secrets, to `docs/platform/LIVE_STATUS.md` (the cloud session can do this if you paste the results to it).
+
+### What is left for the live La Soirée site
+
+Not part of this runbook, and never automatic: merging draft pull request 1 on `la-soiree-bridal`, running `node scripts/set-asset-base.mjs PORTAL` there, registering the live site, and the DNS cutover. The owner's own sign-in link is created only after the live site is on Standard v1.
+
+---
+
+## Path A: command line (original)
 
 You are the Claude session on the owner's Windows computer that built the La Soirée site. You already have Netlify and GitHub access. The cloud session that wrote the platform could not reach Netlify, Supabase or any secret, so the live steps are yours. Everything below uses accounts that already exist. Nothing needs the owner to click anything unless a step says STOP.
 
@@ -28,7 +102,7 @@ npm install
 npx vitest run
 ```
 
-Expected: 9 test files, 88 tests, all passing. If not, stop and report.
+Expected: 9 test files, 89 tests, all passing. If not, stop and report.
 
 ## 2. Create the portal site in the existing Netlify team
 
@@ -41,15 +115,7 @@ If the name is taken, add a short suffix. Note the final address, for example `h
 
 ## 3. Set the secrets (never commit these)
 
-Generate three random strings of at least 32 characters and set them as secret environment variables on the portal site:
-
-```
-SESSION_SECRET   signs login cookies
-INTERNAL_SECRET  protects the background function
-ADMIN_SECRET     protects the operator endpoints
-```
-
-Keep ADMIN_SECRET in a file outside any repo (for example `%USERPROFILE%\.site-manager-admin`) so later onboarding calls can use it.
+Generate one random string of at least 32 characters and set it as a secret environment variable `SM_SECRET` on the portal site. It is the operator password, and the cookie-signing and internal keys are derived from it. (`SESSION_SECRET`, `INTERNAL_SECRET` and `ADMIN_SECRET` still work if you prefer to set them separately.) Keep it in a file outside any repo so later onboarding calls can use it, or use `PORTAL/setup.html` instead of calling the admin API by hand.
 
 Then two credentials:
 

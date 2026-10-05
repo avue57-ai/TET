@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { getStore } from '@netlify/blobs';
 import {
@@ -23,18 +23,26 @@ export function createRuntime(env: Env, o: Partial<Overrides> = {}) {
     resolve: async (siteId) => { const s = await store.get<Site>('sites', siteId); if (!s?.repo) throw new Error('unknown site'); return s.repo; },
     token: async () => need(env, 'GITHUB_TOKEN'),
   });
-  const auth = new InviteAuth(store, need(env, 'SESSION_SECRET'));
+  // One master secret (SM_SECRET) is enough: it is the operator password, and the cookie-signing and internal keys are derived from it.
+  // Individual SESSION_SECRET, INTERNAL_SECRET and ADMIN_SECRET still win if set.
+  const master = env.SM_SECRET ?? '';
+  if (master && master.length < 32) throw new Error('SM_SECRET must be at least 32 characters');
+  const derive = (label: string) => createHmac('sha256', master).update(`site-manager:${label}`).digest('hex');
+  const pick = (name: string, label: string) => env[name] ?? (master ? (label === 'admin' ? master : derive(label)) : need(env, name));
+  const sessionSecret = pick('SESSION_SECRET', 'session');
+  const internal = pick('INTERNAL_SECRET', 'internal');
+  const adminSecret = pick('ADMIN_SECRET', 'admin');
+  const auth = new InviteAuth(store, sessionSecret);
   const svc = new EditService({ store, repo, llm, maxEditsPerDay: Number(env.MAX_EDITS_PER_DAY ?? 30) });
   const assets = new AssetService(store, bytes, describer, siteGuard(store));
-  const internal = need(env, 'INTERNAL_SECRET');
   const send = o.fetchBackground ?? ((url, init) => fetch(url, init));
 
   /** Setup check for operators. Reports which settings exist (never their values) and probes GitHub and the AI model. */
   async function diag(req: Request, url: URL): Promise<Response> {
-    const secret = env.ADMIN_SECRET ?? '';
+    const secret = adminSecret;
     if (secret.length < 32 || !same(req.headers.get('x-admin-secret') ?? '', secret)) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { 'content-type': 'application/json' } });
     const out: Record<string, unknown> = {
-      env: Object.fromEntries(['SESSION_SECRET', 'INTERNAL_SECRET', 'ADMIN_SECRET', 'GITHUB_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'URL'].map((k) => [k, Boolean(env[k])])),
+      env: Object.fromEntries(['SM_SECRET', 'SESSION_SECRET', 'INTERNAL_SECRET', 'ADMIN_SECRET', 'GITHUB_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'URL'].map((k) => [k, Boolean(env[k])])),
       sites: (await store.list<Site>('sites')).map((x) => ({ id: x.id, org: x.orgId, repo: x.repo ? `${x.repo.owner}/${x.repo.repo}` : null })),
     };
     const siteId = url.searchParams.get('site');
@@ -57,7 +65,7 @@ export function createRuntime(env: Env, o: Partial<Overrides> = {}) {
       const url = new URL(req.url);
       const origin = env.URL ?? url.origin;
       if (url.pathname === '/api/admin/diag' && req.method === 'GET') return diag(req, url);
-      if (url.pathname.startsWith('/api/admin/')) return handleAdmin(req, { secret: env.ADMIN_SECRET ?? '', store, auth, assets, origin });
+      if (url.pathname.startsWith('/api/admin/')) return handleAdmin(req, { secret: adminSecret, store, auth, assets, origin });
       const m = /^\/assets\/([a-z0-9-]+)\/(ast_[a-f0-9]+)$/.exec(url.pathname);
       if (m && req.method === 'GET') return assets.serve(m[1]!, m[2]!);
       if (url.pathname.startsWith('/api/'))

@@ -4,7 +4,7 @@ Customers describe a website change in plain language, preview it, and approve i
 
 ```
 npm install
-npx vitest run      # 88 tests
+npx vitest run      # 89 tests
 npx tsc --noEmit -p tsconfig.json
 npm run demo        # local portal with in-memory fakes and a scripted model at http://localhost:8787
 npm run e2e         # browser test against the demo (needs Chromium)
