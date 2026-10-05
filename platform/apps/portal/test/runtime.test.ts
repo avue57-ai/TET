@@ -68,6 +68,17 @@ describe('portal runtime', () => {
     expect((await rt.route(new Request('https://portal.test/whatever'))).status).toBe(404);
   });
 
+  it('diagnostics need the admin secret and never reveal values', async () => {
+    const { rt } = await boot();
+    expect((await rt.route(new Request('https://portal.test/api/admin/diag'))).status).toBe(401);
+    const res = await rt.route(new Request('https://portal.test/api/admin/diag?probe=ai', { headers: { 'x-admin-secret': env.ADMIN_SECRET } }));
+    const body = await res.json() as any;
+    expect(body.env).toMatchObject({ SESSION_SECRET: true, GITHUB_TOKEN: false, ANTHROPIC_API_KEY: false });
+    expect(body.sites[0]).toMatchObject({ id: 'la-soiree', repo: 'avue57-ai/la-soiree-bridal' });
+    expect(body.ai.ok).toBe(true);
+    expect(JSON.stringify(body)).not.toContain(env.SESSION_SECRET);
+  });
+
   it('refuses to start without its secrets', () => {
     expect(() => createRuntime({ SESSION_SECRET: 'x'.repeat(40) }, { store: new InMemoryStore(), bytes: new InMemoryAssetBytes(), repo: new InMemoryRepo(), llm: new ScriptedLlm([]), describer: { describe: async () => ({ description: '', alt: '' }) } })).toThrow(/INTERNAL_SECRET/);
   });

@@ -29,10 +29,34 @@ export function createRuntime(env: Env, o: Partial<Overrides> = {}) {
   const internal = need(env, 'INTERNAL_SECRET');
   const send = o.fetchBackground ?? ((url, init) => fetch(url, init));
 
+  /** Setup check for operators. Reports which settings exist (never their values) and probes GitHub and the AI model. */
+  async function diag(req: Request, url: URL): Promise<Response> {
+    const secret = env.ADMIN_SECRET ?? '';
+    if (secret.length < 32 || !same(req.headers.get('x-admin-secret') ?? '', secret)) return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers: { 'content-type': 'application/json' } });
+    const out: Record<string, unknown> = {
+      env: Object.fromEntries(['SESSION_SECRET', 'INTERNAL_SECRET', 'ADMIN_SECRET', 'GITHUB_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'URL'].map((k) => [k, Boolean(env[k])])),
+      sites: (await store.list<Site>('sites')).map((x) => ({ id: x.id, org: x.orgId, repo: x.repo ? `${x.repo.owner}/${x.repo.repo}` : null })),
+    };
+    const siteId = url.searchParams.get('site');
+    const site = siteId ? await store.get<Site>('sites', siteId) : undefined;
+    if (site?.repo) {
+      try {
+        const r = await (o.fetchBackground ? Promise.resolve(null) : fetch(`https://api.github.com/repos/${site.repo.owner}/${site.repo.repo}`, { headers: { authorization: `Bearer ${need(env, 'GITHUB_TOKEN')}`, accept: 'application/vnd.github+json' } }));
+        out.github = r ? { status: r.status, scopes: r.headers.get('x-oauth-scopes'), canPush: r.status === 200 ? ((await r.json()) as any).permissions?.push ?? null : null } : 'skipped in tests';
+      } catch (e) { out.github = `error: ${(e as Error).message}`; }
+    }
+    if (url.searchParams.get('probe') === 'ai') {
+      try { const r = await llm.complete({ system: 'Reply with the single word ok.', messages: [{ role: 'user', content: 'ping' }], tools: [] }); out.ai = { ok: true, model: r.model, tokens: r.usage }; }
+      catch (e) { out.ai = { ok: false, error: String((e as Error).message).slice(0, 200) }; }
+    }
+    return new Response(JSON.stringify(out, null, 2), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+  }
+
   return {
     async route(req: Request): Promise<Response> {
       const url = new URL(req.url);
       const origin = env.URL ?? url.origin;
+      if (url.pathname === '/api/admin/diag' && req.method === 'GET') return diag(req, url);
       if (url.pathname.startsWith('/api/admin/')) return handleAdmin(req, { secret: env.ADMIN_SECRET ?? '', store, auth, assets, origin });
       const m = /^\/assets\/([a-z0-9-]+)\/(ast_[a-f0-9]+)$/.exec(url.pathname);
       if (m && req.method === 'GET') return assets.serve(m[1]!, m[2]!);
